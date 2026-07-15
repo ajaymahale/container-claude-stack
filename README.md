@@ -45,22 +45,22 @@ npm install -g @aerovato/container
 # 2. run onboarding (choose docker; enable the claude harness)
 container init
 
-# 3. point it at this repo's config (additive files only).
-#    Do NOT symlink settings.json — `container init` owns it (runtime is
+# 3. copy additive config into the build context (real files, NOT symlinks —
+#    OrbStack/docker-buildx won't follow a symlinked Dockerfile).
+#    Do NOT touch settings.json — `container init` owns it (runtime is
 #    per-machine: podman here, docker/OrbStack on the home laptop).
-ln -sf "$PWD/Dockerfile.User" ~/.code-container/Dockerfile.User
-cp    "$PWD/.aliases.sh"     ~/.code-container/.aliases.sh     # real file — buildah won't follow a symlink that escapes the context
-# (re-run this cp after editing .aliases.sh, before `container build user`)
+cp    "$PWD/Dockerfile.User" ~/.code-container/Dockerfile.User
+cp -r "$PWD/bin-container"   ~/.code-container/bin-container
+# (re-run these cps after editing Dockerfile.User or bin-container/, before build)
 
-# 4. build the image (first build ~5+ min)
+# 4. build the image (first build ~10-15 min — rtk compiles from source; cached after)
 container build user
 
 # 5. enter a container and verify
 container
 # inside:
-#   herdr --version      # agent multiplexer present
-#   bun --version        # claude-mem runtime (from the 'bun' tool pack)
-#   type ccg ccm ccdideep ccd ccmh   # provider functions loaded
+#   herdr --version; rtk --version; graphify --version; node --version
+#   which ccg ccm ccdideep ccd       # launchers on /usr/local/bin
 ```
 
 ## Updating the image (rebuild workflow)
@@ -69,7 +69,8 @@ After editing `Dockerfile.User` or `bin-container/`, a rebuild alone is NOT enou
 `container` re-attaches to the existing per-project container (old image). Full cycle:
 
 ```bash
-cp -r ~/claude-stack/bin-container ~/.code-container/bin-container   # scripts into the build context
+cp    ~/claude-stack/Dockerfile.User  ~/.code-container/Dockerfile.User
+cp -r ~/claude-stack/bin-container    ~/.code-container/bin-container
 container build user
 container remove          # destroy the stale container
 container                 # create fresh from the new image
