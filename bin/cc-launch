@@ -30,29 +30,54 @@ umask 077
 [ -n "$DEEPSEEK"  ] && printf 'DEEPSEEK_TOKEN=%s\n'  "$DEEPSEEK"  >> "$PROV_ENV"
 ZAI=""; DEEPINFRA=""; DEEPSEEK=""
 
-# Ensure the container mounts providers.env. Idempotent + additive — does not
-# touch init-owned fields. If newly added, the existing per-project container
-# must be removed once so the next `container` recreates it with the mount.
+# Ensure the shared-SQLite volume exists (all claude containers mount it for one
+# cross-container brain; native ext4 in the VM, so SQLite WAL multi-writer is safe).
+podman volume create claude-mem-shared >/dev/null 2>&1 || true
+
+# Wire the container: providers.env mount + shared claude-mem volume + DATA_DIR.
+# Strips obsolete mem-server flags (CLAUDE_MEM_SERVER_URL / claude-net / bypass)
+# from earlier P3 attempts. Idempotent on init-owned settings.json. If anything
+# changed, the per-project container must be removed once to recreate with it.
 set +e
 python3 - "$SETTINGS" "$PROV_ENV" "$MOUNT_DEST" <<'PY'
 import json, sys
 path, src, dst = sys.argv[1], sys.argv[2], sys.argv[3]
-flag = f"{src}:{dst}:ro"
+obsolete_vals = {
+    "claude-net",
+    "CLAUDE_MEM_SERVER_URL=http://mem-server:3100",
+    "CLAUDE_MEM_ALLOW_LOCAL_DEV_BYPASS=1",
+}
+required = [
+    ("-v", f"{src}:{dst}:ro"),
+    ("-v", "claude-mem-shared:/root/.claude-mem"),
+    ("-e", "CLAUDE_MEM_DATA_DIR=/root/.claude-mem"),
+]
 with open(path) as f:
     cfg = json.load(f)
 drf = cfg.setdefault("dockerRunFlags", [])
-if flag in drf:
-    sys.exit(0)          # mount already configured
-drf.extend(["-v", flag])
-with open(path, "w") as f:
-    json.dump(cfg, f, indent=2)
-sys.exit(10)             # signal: newly added — stale container must be recreated
+cleaned, i = [], 0
+while i < len(drf):
+    tok, nxt = drf[i], drf[i + 1] if i + 1 < len(drf) else None
+    if tok in ("-v", "-e", "--network", "--volume", "--env") and nxt in obsolete_vals:
+        i += 2; continue
+    cleaned.append(tok); i += 1
+changed = cleaned != drf
+drf = cleaned
+for flag, val in required:
+    if val not in drf:
+        drf.extend([flag, val]); changed = True
+cfg["dockerRunFlags"] = drf
+if changed:
+    with open(path, "w") as f:
+        json.dump(cfg, f, indent=2)
+    sys.exit(10)
+sys.exit(0)
 PY
 rc=$?
 set -e
 if [ "$rc" -eq 10 ]; then
-  echo "Mount added to $SETTINGS."
-  echo "Recreate the container so it picks up the mount, then re-run:"
+  echo "Container wiring updated in $SETTINGS (providers.env + shared claude-mem volume + DATA_DIR)."
+  echo "Recreate the container, then re-run:"
   echo "  container remove && $0"
   exit 0
 fi

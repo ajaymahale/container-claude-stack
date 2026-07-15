@@ -83,6 +83,33 @@ Gotchas learned during P1:
 - **bun / herdr** — install to paths outside the harness-config mounts
   (`/root/.bun`, `/root/.local/bin`) so they survive runtime.
 
+## Shared brain (cross-container SQLite) — P3
+
+All claude containers mount one podman **named volume** at `/root/.claude-mem`
+and set `CLAUDE_MEM_DATA_DIR=/root/.claude-mem`, so their claude-mem instances
+share a single SQLite DB. The volume lives on the VM's native ext4 (not a
+virtiofs host mount), so SQLite WAL multi-writer concurrency is safe.
+
+`cc-launch` creates the volume and wires the mount automatically. Recreate after
+the first run:
+
+```bash
+container remove && ~/claude-stack/bin/cc-launch
+```
+
+Inside any container, `mem-search` sees observations written by every container.
+Single-machine only (one podman VM) — cross-machine (work↔home) would need Postgres.
+
+**Why not the full server?** claude-mem's `server-service.cjs` (Postgres-only)
+also needs Redis/BullMQ + an LLM provider key + API-key auth + a worker for
+generated observations — a multi-tenant SaaS stack, disproportionate for
+single-user. Shared-SQLite-on-volume gets cross-container memory with zero extra
+services. `compose/` (mem-server + postgres) is retained as the reference path
+if you ever want the full server; unused by default.
+
+**headroom-proxy deferred** — needs an `ANTHROPIC_API_KEY` (separate from the
+OAuth login `ccm` uses). Tracked under P7.
+
 ## Provider tokens
 
 Not handled in P1. P2 adds `bin/cc-launch` (reads Keychain → mounts

@@ -1,0 +1,49 @@
+# claude-stack plugin/skill catalog — reference for what's installed + how it updates.
+# Auto-update: scripts/update-plugins.sh git-pulls every .git under
+# ~/.claude/skills and ~/.claude/plugins/marketplaces (weekly via launchd).
+# claude-managed plugin BINARIES update via the `/plugin` command (manual;
+# the script prints a reminder).
+
+marketplaces:            # git repos under ~/.claude/plugins/marketplaces — auto git-pull
+  - addy-agent-skills
+  - caveman
+  - claude-plugins-official
+  - dotnet-skills
+  - last30days-skill
+  - ponytail
+  - superwhisper
+  - thedotmack          # claude-mem
+  - understand-anything
+
+plugins_installed:       # under ~/.claude/plugins/cache — update via /plugin
+  - understand-anything
+  - ponytail
+  - dotnet-skills
+  - agent-skills        # from addy-agent-skills
+  - last30days
+  - claude-mem          # from thedotmack
+  - caveman
+  # from claude-plugins-official:
+  - typescript-lsp
+  - context7
+  - code-review
+  - csharp-lsp
+  - mongodb
+  - pr-review-toolkit
+  - frontend-design
+  - explanatory-output-style
+  - superpowers
+  - code-simplifier
+
+skills_git:              # ~/.claude/skills/* (git repos) — auto-discovered + git-pull
+  note: |
+    update-plugins.sh finds these automatically (any dir with a .git). Includes
+    am-*, gsd-*, design-*, graphify, browse, tdd, etc. (~40 dirs). No need to
+    enumerate here — the FS is the source of truth.
+
+hooks:
+  note: |
+    17 hooks in ~/.claude/settings.json, all host-workflow (gsd flow, rtk token
+    optimization, graphify wow-pic graph, claudio sound). They ERROR in-container
+    (host paths /Users/amahale/* + host-only binaries). None are useful in a
+    generic dev container. Reconciliation options in docs/HOOKS.md.

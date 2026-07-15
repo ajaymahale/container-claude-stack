@@ -1,41 +1,62 @@
 FROM localhost/aerovato/container-v3-harness:latest
 
-# Claude Code refuses --dangerously-skip-permissions as root unless it knows it's
-# sandboxed. This IS a sandbox (container) — declare it so the aliases work.
+# Claude Code refuses --dangerously-skip-permissions as root unless sandboxed.
 ENV IS_SANDBOX=1
 
-# herdr — agent multiplexer: per-agent status, detach/reattach (incl. over ssh),
-# socket api so agents can coordinate. One rust binary.
+# ── herdr (agent multiplexer) ────────────────────────────────────────────────
 RUN apt-get update \
  && apt-get install -y --no-install-recommends curl ca-certificates \
  && curl -fsSL https://herdr.dev/install.sh | sh \
  && rm -rf /var/lib/apt/lists/*
 ENV PATH="/root/.local/bin:${PATH}"
 
-# bun (claude-mem runtime) — the 'bun' tool pack is unreliable. Install via the
-# official installer to /root/.bun/bin, which is OUTSIDE the harness-config
-# mounts (/root/.local/share/claude etc.) so it isn't shadowed at runtime.
+# ── bun (claude-mem runtime) ─────────────────────────────────────────────────
 RUN curl -fsSL https://bun.sh/install | bash
 ENV BUN_INSTALL="/root/.bun"
 ENV PATH="/root/.bun/bin:${PATH}"
 
-# Claude Code: the harness stage installs a Linux binary under
-# /root/.local/share/claude/versions, but that path is MOUNTED from the macOS
-# host at runtime (host Mach-O → "Exec format error"). Relocate the Linux
-# binary to /opt/claude (not mounted) and repoint the symlink there.
+# ── claude binary (relocate Linux build out of the macOS-mounted zone) ───────
 RUN mkdir -p /opt/claude \
  && v=$(ls /root/.local/share/claude/versions 2>/dev/null | sort -V | tail -1) \
  && [ -n "$v" ] && mv "/root/.local/share/claude/versions/$v" "/opt/claude/$v" \
  && ln -sfn "/opt/claude/$v" /root/.local/bin/claude
 
-# headroom is NOT installed here — it runs as a separate shared service in P3
-# (compose/proxy). claude containers reach it via ANTHROPIC_BASE_URL (see ccmh).
+# ════════════════════════════════════════════════════════════════════════════
+# FAT container — bake host-workflow tools so the mounted ~/.claude hooks work
+# exactly like local. The hooks hardcode host paths, so we bridge them below.
+# ════════════════════════════════════════════════════════════════════════════
 
-# Provider launchers as standalone scripts on /usr/local/bin — shell-independent,
-# so they resolve in interactive bash AND herdr panes (no .bashrc sourcing, no
-# function-name rules). Tokens are NOT baked: each script sources
-# /root/.secrets/providers.env at run, mounted read-only from the macOS Keychain
-# by bin/cc-launch.
+# node 23 (gsd .js hooks need >=20.12). Bridge the host nvm path the hooks hardcode.
+RUN curl -fsSL https://deb.nodesource.com/setup_23.x | bash - \
+ && apt-get install -y --no-install-recommends nodejs \
+ && rm -rf /var/lib/apt/lists/* \
+ && mkdir -p /Users/amahale/.nvm/versions/node/v23.11.0/bin \
+ && ln -s "$(command -v node)" /Users/amahale/.nvm/versions/node/v23.11.0/bin/node
+
+# graphify (Python pkg 'graphifyy') — graphify query + the gsd-graphify-update hook.
+# (Rebuild race across host+container is accepted — same as multiple host terminals.)
+RUN apt-get update && apt-get install -y --no-install-recommends python3-pip \
+ && pip install --no-cache-dir --break-system-packages graphifyy \
+ && rm -rf /var/lib/apt/lists/*
+
+# rtk (Rust token-saver) — built from source via cargo, same as brew does.
+# NOTE: this layer is slow (~5-8 min, compiles all deps). Cached after first build.
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential pkg-config \
+ && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal \
+ && . "$HOME/.cargo/env" \
+ && cargo install --git https://github.com/rtk-ai/rtk --tag v0.42.3 --locked \
+ && rm -rf /var/lib/apt/lists/*
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Host-path bridge is DYNAMIC: bin-container/bridge-host-paths.sh, called from
+# /root/.bashrc at container start. It reads THIS machine's settings.json and
+# symlinks whatever host paths the hooks reference (~/.claude, the node path at
+# any nvm version, go/bin/claudio). Portable across usernames (work: amahale,
+# home: ajaymahale) — the image never changes between machines.
+
+# ── provider launchers on PATH (shell-independent; work in herdr panes) ──────
 COPY bin-container/ /usr/local/bin/
 RUN chmod +x /usr/local/bin/ccm /usr/local/bin/ccg /usr/local/bin/ccdideep \
-           /usr/local/bin/ccd /usr/local/bin/ccmh /usr/local/bin/claude-mem
+           /usr/local/bin/ccd /usr/local/bin/ccmh /usr/local/bin/claude-mem \
+           /usr/local/bin/bridge-host-paths.sh \
+ && printf '\n[ -x /usr/local/bin/bridge-host-paths.sh ] && /usr/local/bin/bridge-host-paths.sh\n' >> /root/.bashrc

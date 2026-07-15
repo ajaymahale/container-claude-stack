@@ -1,0 +1,68 @@
+# Shared services for claude-stack.
+# mem-server (shared brain) REQUIRES Postgres — server-service.cjs is Postgres-only.
+# headroom-proxy deferred (needs an Anthropic API key) — see P7.
+#
+# Bring-up:
+#   podman network create claude-net                                              # one-time
+#   podman compose -f ~/claude-stack/compose/docker-compose.yml up -d --build
+#   podman logs -f mem-server          # confirm clean listen + migrations, no errors
+# Then bin/cc-launch + container recreate to wire claude containers to it.
+
+networks:
+  claude-net:
+    external: true
+    name: claude-net
+
+volumes:
+  claude-mem-data:
+  claude-mem-pg:
+
+services:
+  postgres:
+    image: docker.io/postgres:16
+    container_name: claude-mem-postgres
+    restart: unless-stopped
+    networks: [claude-net]
+    environment:
+      POSTGRES_USER: claude
+      POSTGRES_PASSWORD: claude-dev     # local-dev only; not exposed to host
+      POSTGRES_DB: claudemem
+    volumes:
+      - claude-mem-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U claude -d claudemem"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  mem-server:
+    build:
+      context: ./mem
+    container_name: mem-server
+    restart: unless-stopped
+    networks: [claude-net]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "3100"
+      CLAUDE_MEM_ALLOW_LOCAL_DEV_BYPASS: "1"
+      CLAUDE_MEM_DATA_DIR: /data
+      CLAUDE_MEM_LOG_LEVEL: info
+      CLAUDE_MEM_SERVER_DATABASE_URL: postgres://claude:claude-dev@postgres:5432/claudemem
+    volumes:
+      - claude-mem-data:/data
+      - ${HOME}/.claude/plugins/cache/thedotmack/claude-mem:/plugin-cache:ro
+    ports:
+      - "127.0.0.1:3100:3100"
+
+  # headroom-proxy (DEFERRED — needs ANTHROPIC_API_KEY):
+  #   headroom-proxy:
+  #     build: { context: ./proxy }
+  #     container_name: headroom-proxy
+  #     restart: unless-stopped
+  #     networks: [claude-net]
+  #     environment:
+  #       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?set ANTHROPIC_API_KEY}
+  #     ports: ["127.0.0.1:8787:8787"]
