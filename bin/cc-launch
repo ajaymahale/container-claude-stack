@@ -32,7 +32,9 @@ ZAI=""; DEEPINFRA=""; DEEPSEEK=""
 
 # Ensure the shared-SQLite volume exists (all claude containers mount it for one
 # cross-container brain; native ext4 in the VM, so SQLite WAL multi-writer is safe).
-podman volume create claude-mem-shared >/dev/null 2>&1 || true
+# Runtime-aware: reads settings.json so docker (OrbStack/home) and podman (work) both work.
+RT=$(python3 -c "import json,os;print(json.load(open(os.path.expanduser('~/.code-container/settings.json'))).get('runtime') or 'docker')" 2>/dev/null || echo docker)
+"$RT" volume create claude-mem-shared >/dev/null 2>&1 || true
 
 # Wire the container: providers.env mount + shared claude-mem volume + DATA_DIR.
 # Strips obsolete mem-server flags (CLAUDE_MEM_SERVER_URL / claude-net / bypass)
@@ -77,9 +79,8 @@ rc=$?
 set -e
 if [ "$rc" -eq 10 ]; then
   echo "Container wiring updated in $SETTINGS (providers.env + shared claude-mem volume + DATA_DIR)."
-  echo "Recreate the container, then re-run:"
-  echo "  container remove && $0"
-  exit 0
+  echo "Recreating the container to apply (project is mounted; in-container state is disposable)..."
+  container remove 2>/dev/null || true     # no-op if none exists yet (first run)
 fi
 
 exec container
