@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# DeepSeek (native) — deepseek-v4-pro[1m]
+[ -f /root/.secrets/providers.env ] && { set -a; . /root/.secrets/providers.env; set +a; }
+ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic" \
+ANTHROPIC_AUTH_TOKEN="${DEEPSEEK_TOKEN:?DEEPSEEK_TOKEN missing — run cc-launch}" \
+ANTHROPIC_MODEL="deepseek-v4-pro[1m]" \
+ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek-v4-pro[1m]" \
+ANTHROPIC_SMALL_FAST_MODEL="deepseek-v4-flash" \
+ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek-v4-flash" \
+DISABLE_NON_ESSENTIAL_MODEL_CALLS=1 \
+CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 \
+CLAUDE_CODE_EFFORT_LEVEL="max" \
+exec claude --dangerously-skip-permissions "$@"

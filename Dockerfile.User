@@ -1,0 +1,41 @@
+FROM localhost/aerovato/container-v3-harness:latest
+
+# Claude Code refuses --dangerously-skip-permissions as root unless it knows it's
+# sandboxed. This IS a sandbox (container) — declare it so the aliases work.
+ENV IS_SANDBOX=1
+
+# herdr — agent multiplexer: per-agent status, detach/reattach (incl. over ssh),
+# socket api so agents can coordinate. One rust binary.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl ca-certificates \
+ && curl -fsSL https://herdr.dev/install.sh | sh \
+ && rm -rf /var/lib/apt/lists/*
+ENV PATH="/root/.local/bin:${PATH}"
+
+# bun (claude-mem runtime) — the 'bun' tool pack is unreliable. Install via the
+# official installer to /root/.bun/bin, which is OUTSIDE the harness-config
+# mounts (/root/.local/share/claude etc.) so it isn't shadowed at runtime.
+RUN curl -fsSL https://bun.sh/install | bash
+ENV BUN_INSTALL="/root/.bun"
+ENV PATH="/root/.bun/bin:${PATH}"
+
+# Claude Code: the harness stage installs a Linux binary under
+# /root/.local/share/claude/versions, but that path is MOUNTED from the macOS
+# host at runtime (host Mach-O → "Exec format error"). Relocate the Linux
+# binary to /opt/claude (not mounted) and repoint the symlink there.
+RUN mkdir -p /opt/claude \
+ && v=$(ls /root/.local/share/claude/versions 2>/dev/null | sort -V | tail -1) \
+ && [ -n "$v" ] && mv "/root/.local/share/claude/versions/$v" "/opt/claude/$v" \
+ && ln -sfn "/opt/claude/$v" /root/.local/bin/claude
+
+# headroom is NOT installed here — it runs as a separate shared service in P3
+# (compose/proxy). claude containers reach it via ANTHROPIC_BASE_URL (see ccmh).
+
+# Provider launchers as standalone scripts on /usr/local/bin — shell-independent,
+# so they resolve in interactive bash AND herdr panes (no .bashrc sourcing, no
+# function-name rules). Tokens are NOT baked: each script sources
+# /root/.secrets/providers.env at run, mounted read-only from the macOS Keychain
+# by bin/cc-launch.
+COPY bin-container/ /usr/local/bin/
+RUN chmod +x /usr/local/bin/ccm /usr/local/bin/ccg /usr/local/bin/ccdideep \
+           /usr/local/bin/ccd /usr/local/bin/ccmh /usr/local/bin/claude-mem

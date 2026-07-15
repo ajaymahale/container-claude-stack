@@ -1,0 +1,16 @@
+{
+  "_comment": "TEMPLATE ONLY — do not symlink over the live ~/.code-container/settings.json. `container init` owns `runtime` (per-machine: podman on work Mac, docker/OrbStack on home laptop) plus internal version fields. This file documents the other keys.",
+  "runtime": "podman",
+  "enabledHarnesses": ["claude"],
+  "enabledTools": [
+    "npm-config",
+    "git-config",
+    "vim-config",
+    "python",
+    "bun",
+    "enhanced-tools"
+  ],
+  "systemMounts": {
+    "ssh": false
+  }
+}

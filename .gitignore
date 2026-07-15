@@ -1,0 +1,16 @@
+# logs
+logs/
+
+# secrets — never commit
+secrets.env
+secrets/*.env
+providers.env
+*.token
+.env
+
+# built images / exports
+*.tar
+
+# os / editor
+.DS_Store
+*.swp

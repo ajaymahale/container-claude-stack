@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# claude-mem worker (bun)
+script="$(ls -d /root/.claude/plugins/cache/thedotmack/claude-mem/*/scripts/worker-service.cjs 2>/dev/null | sort -V | tail -1)"
+[ -n "$script" ] || { echo "claude-mem worker not found in /root/.claude/plugins" >&2; exit 1; }
+exec bun "$script" "$@"

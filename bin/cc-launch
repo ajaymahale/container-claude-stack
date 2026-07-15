@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# cc-launch — enter a project container with provider tokens mounted from the
+# macOS Keychain.
+#
+# Flow: read keychain -> write host-side providers.env (0600) -> ensure the
+# container image mounts it read-only at /root/.secrets/providers.env -> enter.
+# .aliases.sh sources that file; the cc*/claude-mem functions read from env.
+# Nothing is baked into the image or committed to git.
+set -euo pipefail
+
+PROV_ENV="$HOME/.code-container/providers.env"
+SETTINGS="$HOME/.code-container/settings.json"
+MOUNT_DEST="/root/.secrets/providers.env"
+
+read_token() { security find-generic-password -a "$USER" -s "$1" -w 2>/dev/null || true; }
+
+ZAI=$(read_token cc-zai-token)
+DEEPINFRA=$(read_token cc-deepinfra-token)
+DEEPSEEK=$(read_token cc-deepseek-token)
+if [ -z "$ZAI" ] && [ -z "$DEEPINFRA" ] && [ -z "$DEEPSEEK" ]; then
+  echo "No provider tokens in Keychain. Run: ~/claude-stack/secrets/secrets.bootstrap.sh"
+  exit 1
+fi
+
+# Refresh providers.env from keychain (host-side, tight perms).
+umask 077
+: > "$PROV_ENV"
+[ -n "$ZAI"       ] && printf 'ZAI_TOKEN=%s\n'       "$ZAI"       >> "$PROV_ENV"
+[ -n "$DEEPINFRA" ] && printf 'DEEPINFRA_TOKEN=%s\n' "$DEEPINFRA" >> "$PROV_ENV"
+[ -n "$DEEPSEEK"  ] && printf 'DEEPSEEK_TOKEN=%s\n'  "$DEEPSEEK"  >> "$PROV_ENV"
+ZAI=""; DEEPINFRA=""; DEEPSEEK=""
+
+# Ensure the container mounts providers.env. Idempotent + additive — does not
+# touch init-owned fields. If newly added, the existing per-project container
+# must be removed once so the next `container` recreates it with the mount.
+set +e
+python3 - "$SETTINGS" "$PROV_ENV" "$MOUNT_DEST" <<'PY'
+import json, sys
+path, src, dst = sys.argv[1], sys.argv[2], sys.argv[3]
+flag = f"{src}:{dst}:ro"
+with open(path) as f:
+    cfg = json.load(f)
+drf = cfg.setdefault("dockerRunFlags", [])
+if flag in drf:
+    sys.exit(0)          # mount already configured
+drf.extend(["-v", flag])
+with open(path, "w") as f:
+    json.dump(cfg, f, indent=2)
+sys.exit(10)             # signal: newly added — stale container must be recreated
+PY
+rc=$?
+set -e
+if [ "$rc" -eq 10 ]; then
+  echo "Mount added to $SETTINGS."
+  echo "Recreate the container so it picks up the mount, then re-run:"
+  echo "  container remove && $0"
+  exit 0
+fi
+
+exec container

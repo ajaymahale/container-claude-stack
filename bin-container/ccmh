@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Claude Code through headroom proxy (anthropic path; P3 brings the service up)
+ANTHROPIC_BASE_URL="http://headroom-proxy:8787" \
+exec claude --dangerously-skip-permissions "$@"

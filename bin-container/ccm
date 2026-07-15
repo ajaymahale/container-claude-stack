@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# anthropic — native claude login (no token)
+exec claude --dangerously-skip-permissions "$@"
