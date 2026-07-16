@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GitHub Spec Kit — Cheatsheet vs GSD</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --ink:#e6edf3; --mut:#9aa7b4;
+    --line:#2a3340; --accent:#58a6ff; --code:#1f6feb22;
+    --setup:#8b949e; --discuss:#d29922; --proto:#a371f7; --spec:#58a6ff;
+    --plan:#3fb950; --exec:#db61a2; --test:#f0883e; --push:#2f81f7; --ramp:#56d4dd;
+    --ok:#3fb950; --warn:#d29922; --no:#f85149;
+  }
+  @media (prefers-color-scheme:light){
+    :root{--bg:#f6f8fa;--panel:#fff;--panel2:#f0f3f6;--ink:#1f2328;--mut:#57606a;--line:#d0d7de;--code:#ddf4ff;}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;}
+  .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:30px;margin:0 0 4px}
+  h2{font-size:20px;margin:40px 0 12px;border-bottom:1px solid var(--line);padding-bottom:6px}
+  .sub{color:var(--mut);margin:0 0 24px}
+  code{background:var(--code);padding:1px 6px;border-radius:5px;font:13px ui-monospace,SFMono-Regular,Menlo,monospace}
+  a{color:var(--accent)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--mut);margin:8px 0 0}
+  .pill{display:inline-block;font:600 11px ui-monospace,monospace;padding:1px 7px;border-radius:999px;color:#06121f}
+  .u{background:var(--spec)} .opt{background:var(--mut);opacity:.85}
+  table{border-collapse:collapse;width:100%;margin:6px 0;font-size:14px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  tr:hover td{background:var(--panel2)}
+  .step{font:700 12px ui-monospace,monospace;color:#06121f;padding:2px 8px;border-radius:6px;white-space:nowrap}
+  .s0{background:var(--setup)} .s1{background:var(--spec)} .s2{background:var(--plan)}
+  .s3{background:var(--exec)} .s4{background:var(--test)} .s5{background:var(--push)} .sr{background:var(--ramp)}
+  .rules{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:14px 18px;margin:16px 0}
+  .rules.warn{border-left-color:var(--warn)}
+  .rules b{color:var(--ink)}
+  details{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin:8px 0;padding:0 14px}
+  details[open]{background:var(--panel2)}
+  summary{cursor:pointer;padding:11px 0;font-weight:600;list-style:none;display:flex;align-items:center;gap:10px}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"▸";color:var(--mut);font-size:12px}
+  details[open] summary::before{content:"▾"}
+  .body{padding:0 0 12px 22px;color:var(--mut)}
+  .body code{color:var(--ink)}
+  .rel{color:#06121f;font:600 11px ui-monospace,monospace;padding:1px 7px;border-radius:5px}
+  .ok{background:var(--ok)} .warn{background:var(--warn)} .no{background:var(--no)}
+  .foot{margin-top:40px;color:var(--mut);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font:12px/1.5 ui-monospace,monospace;color:var(--mut);margin:12px 0}
+  .note{color:var(--warn);font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🌱 GitHub Spec Kit — vs GSD</h1>
+  <p class="sub"><b>Spec-Driven Development</b> toolkit (the "Specify" CLI). Spec becomes executable — define
+  <i>what</i>+<i>why</i>, refine through structured phases, agent implements. Anti-"vibe coding."
+  <b>Agent-agnostic (30+ tools).</b> <span class="note">Not installed locally — researched from source.</span></p>
+  <p class="sub">Source: <a href="https://github.com/github/spec-kit">github/spec-kit</a> ·
+  <a href="https://github.github.io/spec-kit/">github.github.io/spec-kit</a> ·
+  <a href="https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/">GitHub Blog</a></p>
+
+  <div class="rules">
+    <b>Install + init</b> (needs <a href="https://docs.astral.sh/uv/">uv</a>):
+<pre>uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@vX.Y.Z
+specify init my-project --integration claude-code   # or copilot, gemini-cli, codex ...
+cd my-project                                        # then launch your agent here</pre>
+    Commands surface as <code>/speckit.*</code> (Claude/Copilot/Gemini), <code>$speckit-*</code> (Codex skills),
+    <code>/agents</code> (Copilot CLI). <code>specify integration list</code> → all 30+.
+  </div>
+
+<pre>  constitution → [clarify] → specify → plan → tasks → [analyze] → implement → converge ↺
+    governing           what/why    how      units     coverage     build      loop-to-spec</pre>
+
+  <h2>The pipeline — 7 core commands</h2>
+  <table>
+    <thead><tr><th>#</th><th>Command</th><th>Does</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td><span class="step s0">constitution</span> <code>/speckit.constitution</code></td><td><b>First.</b> Project governing principles (quality, testing, UX, perf) guiding ALL later work.</td></tr>
+      <tr><td>·</td><td><span class="step s1 opt">clarify*</span> <code>/speckit.clarify</code></td><td>Clarify underspecified areas. Run <b>before</b> plan. (was <code>/quizme</code>)</td></tr>
+      <tr><td>1</td><td><span class="step s1">specify</span> <code>/speckit.specify</code></td><td>Define <b>what</b>+<b>why</b> — requirements + user stories. <i>Not</i> the tech stack.</td></tr>
+      <tr><td>2</td><td><span class="step s2">plan</span> <code>/speckit.plan</code></td><td>Technical implementation plan w/ chosen stack + architecture.</td></tr>
+      <tr><td>3</td><td><span class="step s3">tasks</span> <code>/speckit.tasks</code></td><td>Actionable task list from the plan.</td></tr>
+      <tr><td>·</td><td><span class="step s4 opt">analyze*</span> <code>/speckit.analyze</code></td><td>Cross-artifact consistency + coverage. <b>After</b> tasks, <b>before</b> implement.</td></tr>
+      <tr><td>4</td><td><span class="step s5">implement</span> <code>/speckit.implement</code></td><td>Execute all tasks, build the feature per the plan.</td></tr>
+      <tr><td>5</td><td><span class="step sr">converge</span> <code>/speckit.converge</code></td><td>Assess codebase vs spec/plan/tasks → append remaining work as new tasks. <b>The loop.</b></td></tr>
+    </tbody>
+  </table>
+  <p class="sub"><code>/speckit.taskstoissues</code> (tasks → GitHub issues) · <code>/speckit.checklist</code> (quality checklists — "unit tests for English"). Artifacts: <code>.specify/memory/constitution.md</code>, <code>specs/</code> (spec/plan/tasks). * = optional.</p>
+
+  <h2>Customization — the priority stack (Spec Kit's superpower)</h2>
+  <table>
+    <thead><tr><th>Pri</th><th>Layer</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>.specify/templates/overrides/</code></td><td>one-off project-local tweaks</td></tr>
+      <tr><td>2</td><td><b>Presets</b></td><td>customize <i>how it works</i> — override templates/commands (compliance, DDD, language, test-first)</td></tr>
+      <tr><td>3</td><td><b>Extensions</b></td><td>add <i>new capabilities</i> — new commands/templates (Jira, post-impl review, V-Model)</td></tr>
+      <tr><td>4</td><td>Core defaults</td><td>built-in SDD commands + templates</td></tr>
+    </tbody>
+  </table>
+  <p class="sub">Resolved top-down at runtime, first match wins. <b>Bundles</b> = role-based package (PM, BA, security, dev) of extensions+presets+workflows in one versioned <code>bundle.yml</code> — <code>specify bundle search/info/install</code>. Idempotent, project-confined, offline.</p>
+
+  <h2>Development modes</h2>
+  <details><summary><span class="step s1">0-to-1</span> greenfield — generate from scratch</summary><div class="body">Start with high-level requirements → generate specs → plan steps → build production-ready app.</div></details>
+  <details><summary><span class="step s3">exploration</span> creative — parallel implementations</summary><div class="body">Explore diverse solutions, multiple tech stacks &amp; architectures, experiment with UX patterns.</div></details>
+  <details><summary><span class="step sr">brownfield</span> iterative enhancement <span class="rel ok">your territory</span></summary><div class="body">Add features iteratively, modernize legacy systems, adapt processes. <code>spec-persistence</code> + evolving-specs loop keeps tooling updates separate from artifact evolution.</div></details>
+
+  <h2>Spec Kit vs GSD — at a glance</h2>
+  <table>
+    <thead><tr><th>Dimension</th><th>Spec Kit</th><th>GSD</th></tr></thead>
+    <tbody>
+      <tr><td>Scope</td><td>single feature/spec pipeline</td><td>project + milestone lifecycle</td></tr>
+      <tr><td>Artifacts</td><td><code>constitution.md</code>, <code>specs/</code> (spec/plan/tasks)</td><td><code>PROJECT.md</code>, <code>ROADMAP</code>, per-phase <code>SPEC/PLAN/VERIFICATION</code></td></tr>
+      <tr><td>Entry</td><td><code>/speckit.*</code> (agent-agnostic, 30+ tools)</td><td><code>/gsd-*</code> (Claude-first)</td></tr>
+      <tr><td>The "constitution"</td><td><b>first-class governed principles</b> artifact</td><td>no direct equiv (<code>CLAUDE.md</code>/<code>PROJECT.md</code> closest)</td></tr>
+      <tr><td>Completion loop</td><td><code>/speckit.converge</code> — codebase vs spec, append remaining</td><td><code>/gsd-verify-work</code> + goal-backward verifier</td></tr>
+      <tr><td>Verification</td><td><code>/speckit.analyze</code> (cross-artifact), <code>/checklist</code></td><td>goal-backward verifier = <b>hard blocker</b>, plan-checker, decision gate</td></tr>
+      <tr><td>Customization</td><td>extensions/presets/bundles priority stack + marketplace</td><td>GSD config + model profile</td></tr>
+      <tr><td>Orchestration</td><td>one agent, sequential tasks (no fan-out)</td><td>wave-based parallel subagents + git worktrees</td></tr>
+      <tr><td>State / memory</td><td><code>.specify/</code> + <code>specs/</code> artifacts</td><td><code>.planning/</code> + MemPalace temporal KG, threads, capture/resume</td></tr>
+      <tr><td>Tool reach</td><td>Copilot, Claude Code, Gemini, Codex … (30+)</td><td>Claude Code-first</td></tr>
+      <tr><td>Best for</td><td>portable spec→code on any agent; heavy customization</td><td>durable multi-phase project w/ verification rigor</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Phase mapping</h2>
+  <table>
+    <thead><tr><th>Spec Kit</th><th>GSD</th></tr></thead>
+    <tbody>
+      <tr><td><code>constitution</code></td><td>(no equiv — ~<code>CLAUDE.local.md</code> + PROJECT.md principles)</td></tr>
+      <tr><td><code>clarify</code>, <code>specify</code></td><td><code>/gsd-spec-phase</code>, <code>/gsd-discuss-phase</code></td></tr>
+      <tr><td><code>plan</code>, <code>tasks</code></td><td><code>/gsd-plan-phase</code></td></tr>
+      <tr><td><code>analyze</code></td><td><code>/gsd-plan-checker</code>, <code>/gsd-verify-work</code> (draft)</td></tr>
+      <tr><td><code>implement</code></td><td><code>/gsd-execute-phase</code>, <code>/gsd-quick</code>, <code>/gsd-fast</code></td></tr>
+      <tr><td><code>converge</code></td><td><code>/gsd-verify-work</code></td></tr>
+      <tr><td><code>taskstoissues</code></td><td>(no native — <code>/gsd-inbox</code> triages inbound)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>What each has that the other lacks</h2>
+  <table>
+    <thead><tr><th>Spec Kit-only</th><th>GSD-only</th></tr></thead>
+    <tbody>
+      <tr><td>
+        <code>constitution</code> as first-class artifact<br>
+        <b>Agent-agnostic</b> — same spec on any tool<br>
+        <b>extensions/presets/bundles</b> marketplace<br>
+        <b>Creative exploration</b> (parallel multi-stack)<br>
+        <code>converge</code> loop as a primitive<br>
+        <code>checklist</code> ("unit tests for English")
+      </td><td>
+        Project/milestone lifecycle + ROADMAP<br>
+        Durable cross-session memory (MemPalace, threads)<br>
+        Goal-backward verification = <b>hard blocker</b><br>
+        Wave parallelization + git worktrees<br>
+        AI-phase / UI-phase specializations<br>
+        Import/ingest with conflict detection<br>
+        Dozens of orchestration subagents
+      </td></tr>
+    </tbody>
+  </table>
+
+  <h2>For your stack (.NET backend, legacy reverse-map, already on GSD)</h2>
+  <div class="rules warn">
+    <b>Low migration pressure.</b> Your established codebase is deep in GSD's spec→plan→execute→verify loop
+    <i>with</i> durable memory + milestone tracking + goal-backward rigor — thicker than Spec Kit for project
+    work. <b>Stay GSD as spine.</b>
+  </div>
+  <div class="rules">
+    <b>Transferable ideas worth stealing:</b><br>
+    • <b><code>constitution</code> as a governed artifact</b> — you already keep principles in <code>CLAUDE.local.md</code> (byte-identical gates, source-driven, no-vocab-leakage, Aspire HTTP profile). Promote to a checked-in <code>constitution.md</code> every spec references.<br>
+    • <b><code>converge</code> loop</b> — mirrors your byte-identical generator snapshot gate; name it ("keep going till snapshot green").<br>
+    • <b>brownfield / iterative-enhancement</b> — your exact scenario; if you ever trial Spec Kit, this is the mode, not 0-to-1.<br>
+    • <b>extensions/presets</b> — want DDD-flavored or compliance-gated SDD? presets are the lever.<br><br>
+    <b>Spec Kit genuinely wins</b> when you need the <i>same spec</i> on Copilot <b>and</b> Claude (portable unit), or want the extension/bundle ecosystem around spec→code.
+  </div>
+
+  <div class="foot">
+    Markdown twin: <code>out/spec-kit.md</code>. Rendered by <code>/am-skills-primer spec-kit</code>. Not on disk — content from source only.
+    Sources: <a href="https://github.com/github/spec-kit">github/spec-kit</a> · <a href="https://github.github.io/spec-kit/">github.github.io/spec-kit</a> · <a href="https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/">GitHub Blog</a>.
+  </div>
+
+</div>
+</body>
+</html>

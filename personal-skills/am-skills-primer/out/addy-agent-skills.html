@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Addy Osmani agent-skills — Cheatsheet vs GSD</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --ink:#e6edf3; --mut:#9aa7b4;
+    --line:#2a3340; --accent:#58a6ff; --code:#1f6feb22;
+    --setup:#8b949e; --discuss:#d29922; --proto:#a371f7; --spec:#58a6ff;
+    --plan:#3fb950; --exec:#db61a2; --test:#f0883e; --push:#2f81f7; --ramp:#56d4dd;
+    --ok:#3fb950; --warn:#d29922; --no:#f85149;
+  }
+  @media (prefers-color-scheme:light){
+    :root{--bg:#f6f8fa;--panel:#fff;--panel2:#f0f3f6;--ink:#1f2328;--mut:#57606a;--line:#d0d7de;--code:#ddf4ff;}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;}
+  .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:30px;margin:0 0 4px}
+  h2{font-size:20px;margin:40px 0 12px;border-bottom:1px solid var(--line);padding-bottom:6px}
+  .sub{color:var(--mut);margin:0 0 24px}
+  code{background:var(--code);padding:1px 6px;border-radius:5px;font:13px ui-monospace,SFMono-Regular,Menlo,monospace}
+  a{color:var(--accent)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--mut);margin:8px 0 0}
+  .pill{display:inline-block;font:600 11px ui-monospace,monospace;padding:1px 7px;border-radius:999px;color:#06121f}
+  .u{background:var(--spec)} .a{background:var(--mut)}
+  table{border-collapse:collapse;width:100%;margin:6px 0;font-size:14px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  tr:hover td{background:var(--panel2)}
+  .step{font:700 12px ui-monospace,monospace;color:#06121f;padding:2px 8px;border-radius:6px;white-space:nowrap}
+  .s0{background:var(--setup)} .s2{background:var(--spec)} .s3{background:var(--plan)}
+  .s4{background:var(--exec)} .s5{background:var(--test)} .s6{background:var(--push)} .sr{background:var(--ramp)}
+  .rules{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:14px 18px;margin:16px 0}
+  .rules.warn{border-left-color:var(--warn)}
+  .rules b{color:var(--ink)}
+  details{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin:8px 0;padding:0 14px}
+  details[open]{background:var(--panel2)}
+  summary{cursor:pointer;padding:11px 0;font-weight:600;list-style:none;display:flex;align-items:center;gap:10px}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"▸";color:var(--mut);font-size:12px}
+  details[open] summary::before{content:"▾"}
+  .body{padding:0 0 12px 22px;color:var(--mut)}
+  .body code{color:var(--ink)}
+  .rel{color:#06121f;font:600 11px ui-monospace,monospace;padding:1px 7px;border-radius:5px}
+  .ok{background:var(--ok)} .warn{background:var(--warn)} .no{background:var(--no)}
+  .foot{margin-top:40px;color:var(--mut);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font:12px/1.5 ui-monospace,monospace;color:var(--mut);margin:12px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Addy Osmani <code>agent-skills</code> — vs GSD</h1>
+  <p class="sub">24 skills + 8 commands from <a href="https://github.com/addyosmani/agent-skills">addyosmani/agent-skills</a>,
+  on the <b>Define → Plan → Build → Verify → Review → Ship</b> lifecycle. Blog: <a href="https://addyosmani.com/blog/agent-skills/">addyosmani.com/blog/agent-skills</a>.</p>
+  <div class="legend">
+    <span><span class="pill u">/cmd</span> you type it (command)</span>
+    <span><span class="pill a">skill</span> model fires it (triggered)</span>
+    <span><span class="rel ok">graft</span> high-value to your stack</span>
+    <span><span class="rel warn">low</span> <span class="rel no">skip</span></span>
+  </div>
+
+<pre>  DEFINE          PLAN           BUILD          VERIFY         REVIEW          SHIP
+ ┌──────┐      ┌──────┐      ┌──────┐      ┌──────┐      ┌──────┐      ┌──────┐
+ │ Idea │ ───▶ │ Spec │ ───▶ │ Code │ ───▶ │ Test │ ───▶ │  QA  │ ───▶ │  Go  │
+ │Refine│      │  PRD │      │ Impl │      │Debug │      │ Gate │      │ Live │
+ └──────┘      └──────┘      └──────┘      └──────┘      └──────┘      └──────┘
+  /spec          /plan          /build        /test         /review       /ship</pre>
+
+  <h2>TL;DR — Addy vs GSD</h2>
+  <table>
+    <thead><tr><th>Dimension</th><th>agent-skills</th><th>GSD</th></tr></thead>
+    <tbody>
+      <tr><td>Shape</td><td>concern-library + 8 cmds, light router</td><td>full methodology: project→milestone→phase→plan→wave</td></tr>
+      <tr><td>State</td><td><b>stateless</b> — lives in repo/commits</td><td><b>heavy</b> <code>.planning/</code> (ROADMAP, PLAN/SPEC/VERIFICATION, threads, MemPalace)</td></tr>
+      <tr><td>Granularity</td><td>feature-level</td><td>multi-phase projects, durable roadmap</td></tr>
+      <tr><td>Discipline</td><td>anti-rationalization + Red Flags <i>baked into each skill</i></td><td>external gates: plan-checker, verifier, decision-coverage</td></tr>
+      <tr><td>Agents</td><td>4 review personas (parallel in <code>/ship</code>)</td><td>dozens of subagents + wave parallelization w/ worktrees</td></tr>
+      <tr><td>Auto mode</td><td><code>/build auto</code></td><td><code>/gsd-autonomous</code></td></tr>
+      <tr><td>Tool reach</td><td>multi-tool (Cursor/Gemini/Antigravity/OpenCode/Copilot)</td><td>Claude-first</td></tr>
+      <tr><td>Orientation</td><td>web/frontend-forward</td><td>backend/enterprise + AI/UI-phase specs</td></tr>
+    </tbody>
+  </table>
+
+  <div class="rules">
+    <b>One-line verdict:</b> GSD = how the <i>project</i> runs (durable, orchestrated, gated).
+    Addy = how a <i>single concern</i> is done well (stateless, opinionated, portable).
+    <b>Keep GSD as spine; reach for Addy per-concern.</b>
+  </div>
+
+  <h2>Phase command mapping</h2>
+  <table>
+    <thead><tr><th>Phase</th><th>Addy</th><th>GSD</th></tr></thead>
+    <tbody>
+      <tr><td><span class="step s2">define</span></td><td><code>/spec</code>, <code>interview-me</code>, <code>idea-refine</code></td><td><code>/gsd-explore</code>, <code>/gsd-spec-phase</code>, <code>/gsd-discuss-phase</code></td></tr>
+      <tr><td><span class="step s3">plan</span></td><td><code>/plan</code>, <code>planning-and-task-breakdown</code></td><td><code>/gsd-plan-phase</code></td></tr>
+      <tr><td><span class="step s4">build</span></td><td><code>/build</code>, <code>incremental-implementation</code>, <code>tdd</code></td><td><code>/gsd-execute-phase</code>, <code>/gsd-quick</code>, <code>/gsd-fast</code></td></tr>
+      <tr><td><span class="step s5">verify</span></td><td><code>/test</code>, <code>debugging-and-error-recovery</code></td><td><code>/gsd-verify-work</code>, <code>/gsd-add-tests</code></td></tr>
+      <tr><td><span class="step s6">review</span></td><td><code>/review</code>, <code>code-review-and-quality</code></td><td><code>/gsd-code-review</code>, <code>/gsd-secure-phase</code></td></tr>
+      <tr><td><span class="step sr">ship</span></td><td><code>/ship</code>, <code>shipping-and-launch</code></td><td><code>/gsd-ship</code>, <code>/gsd-pr-branch</code></td></tr>
+      <tr><td><span class="step s0">debug</span></td><td><code>debugging-and-error-recovery</code></td><td><code>/gsd-debug</code>, <code>/gsd-forensics</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2>The 8 commands</h2>
+  <table>
+    <thead><tr><th>Command</th><th>Principle</th><th>Auto-activates</th></tr></thead>
+    <tbody>
+      <tr><td><code>/spec</code></td><td>Spec before code</td><td>interview-me, idea-refine, spec-driven-development</td></tr>
+      <tr><td><code>/plan</code></td><td>Small, atomic tasks</td><td>planning-and-task-breakdown</td></tr>
+      <tr><td><code>/build</code></td><td>One slice at a time</td><td>incremental-implementation, tdd</td></tr>
+      <tr><td><code>/test</code></td><td>Tests are proof</td><td>tdd, debugging-and-error-recovery</td></tr>
+      <tr><td><code>/review</code></td><td>Improve code health</td><td>code-review-and-quality, security, perf</td></tr>
+      <tr><td><code>/webperf</code></td><td>Measure before optimize</td><td>performance-optimization</td></tr>
+      <tr><td><code>/code-simplify</code></td><td>Clarity over cleverness</td><td>code-simplification</td></tr>
+      <tr><td><code>/ship</code></td><td>Faster is safer</td><td>shipping-and-launch + review personas</td></tr>
+    </tbody>
+  </table>
+  <p class="sub"><code>/build auto</code> = approve the plan once, then it implements every task test-driven, committing each, pausing on failure. Removes the human <i>between</i> tasks, not the verification.</p>
+
+  <h2>All 24 skills — by phase</h2>
+
+  <details open><summary><span class="step s0">meta</span> &nbsp; using-agent-skills</summary><div class="body">Session start. Routes incoming work → right skill. Defines the pack's shared operating rules. The router.</div></details>
+
+  <details><summary><span class="step s2">define</span> &nbsp; interview-me</summary><div class="body">One-question-at-a-time interview → ~95% confidence on real intent. Stops you silently filling in ambiguous asks. Fires on "interview me" / "grill me" / "are we sure?".</div></details>
+  <details><summary><span class="step s2">define</span> &nbsp; idea-refine</summary><div class="body">Divergent then convergent thinking. Vague idea → sharp proposal. "ideate" / "refine this idea" / "stress-test my plan".</div></details>
+  <details><summary><span class="step s2">define</span> &nbsp; spec-driven-development</summary><div class="body">Write a PRD (objectives, commands, structure, style, testing, boundaries) before any code.</div></details>
+
+  <details><summary><span class="step s3">plan</span> &nbsp; planning-and-task-breakdown</summary><div class="body">Decompose a spec → small verifiable tasks with acceptance criteria + dependency ordering.</div></details>
+
+  <details><summary><span class="step s4">build</span> &nbsp; incremental-implementation</summary><div class="body">Thin vertical slices: implement → test → verify → commit. Feature flags, safe defaults, rollback-friendly. Any change &gt;1 file.</div></details>
+  <details><summary><span class="step s4">build</span> &nbsp; test-driven-development</summary><div class="body">Red-Green-Refactor. Test pyramid 80/15/5, DAMP over DRY, Beyoncé Rule.</div></details>
+  <details><summary><span class="step s4">build</span> &nbsp; context-engineering <span class="rel ok">graft</span></summary><div class="body">Feed the agent the right info at the right time — rules files, context packing, MCP. Fires on new session / degrading output / switching tasks.</div></details>
+  <details><summary><span class="step s4">build</span> &nbsp; source-driven-development <span class="rel ok">graft</span></summary><div class="body">Ground every framework decision in official docs — verify, cite, flag unverified. Pairs with generator/Protobuf/Mongo decisions.</div></details>
+  <details><summary><span class="step s4">build</span> &nbsp; doubt-driven-development <span class="rel ok">graft</span></summary><div class="body"><b>The one to steal.</b> Adversarial fresh-context review of every non-trivial decision: CLAIM → EXTRACT → DOUBT → RECONCILE → STOP. Optional cross-model escalation. Fits byte-identical binding gates.</div></details>
+  <details><summary><span class="step s4">build</span> &nbsp; frontend-ui-engineering <span class="rel no">skip</span></summary><div class="body">Component arch, design systems, state, responsive, WCAG 2.1 AA. Web-only — no UI in this stack.</div></details>
+  <details><summary><span class="step s4">build</span> &nbsp; api-and-interface-design <span class="rel ok">graft</span></summary><div class="body">Contract-first, Hyrum's Law, One-Version Rule, error semantics, boundary validation. For legacy reverse-map / <code>IArticleRepository</code> seams.</div></details>
+
+  <details><summary><span class="step s5">verify</span> &nbsp; browser-testing-with-devtools <span class="rel no">skip</span></summary><div class="body">Chrome DevTools MCP — DOM, console, network, profiling. Web-only, needs chrome-devtools MCP.</div></details>
+  <details><summary><span class="step s5">verify</span> &nbsp; debugging-and-error-recovery</summary><div class="body">5-step triage: reproduce → localize → reduce → fix → guard. Stop-the-line rule, safe fallbacks.</div></details>
+
+  <details><summary><span class="step s6">review</span> &nbsp; code-review-and-quality</summary><div class="body">Five-axis review, change sizing (~100 lines), severity labels (Nit/Optional/FYI), splitting strategies. Before any merge.</div></details>
+  <details><summary><span class="step s6">review</span> &nbsp; code-simplification <span class="rel ok">graft</span></summary><div class="body">Chesterton's Fence, Rule of 500. Reduce complexity, preserve exact behavior. Good on the LegacyMapperGenerator.</div></details>
+  <details><summary><span class="step s6">review</span> &nbsp; security-and-hardening</summary><div class="body">OWASP Top 10, auth patterns, secrets mgmt, dep auditing, three-tier boundary system.</div></details>
+  <details><summary><span class="step s6">review</span> &nbsp; performance-optimization <span class="rel warn">low</span></summary><div class="body">Measure-first — Core Web Vitals, profiling, bundle analysis. Web-leaning; backend perf needs other tooling.</div></details>
+
+  <details><summary><span class="step sr">ship</span> &nbsp; git-workflow-and-versioning</summary><div class="body">Trunk-based, atomic commits, change sizing (~100 lines), commit-as-save-point. Every change.</div></details>
+  <details><summary><span class="step sr">ship</span> &nbsp; ci-cd-and-automation</summary><div class="body">Shift Left, Faster-is-Safer, feature flags, quality-gate pipelines, failure feedback loops.</div></details>
+  <details><summary><span class="step sr">ship</span> &nbsp; deprecation-and-migration <span class="rel ok">graft</span></summary><div class="body">Code-as-liability mindset, compulsory vs advisory deprecation, migration patterns, zombie-code removal. Your PIES/rename work is exactly this.</div></details>
+  <details><summary><span class="step sr">ship</span> &nbsp; documentation-and-adrs</summary><div class="body">ADRs, API docs, inline-doc standards — document the <i>why</i>.</div></details>
+  <details><summary><span class="step sr">ship</span> &nbsp; observability-and-instrumentation <span class="rel ok">graft</span></summary><div class="body">Structured logging, RED metrics, OpenTelemetry tracing, symptom-based alerting. Instrument as you build. For API + publishers.</div></details>
+  <details><summary><span class="step sr">ship</span> &nbsp; shipping-and-launch</summary><div class="body">Pre-launch checklists, feature-flag lifecycle, staged rollouts, rollback, monitoring setup.</div></details>
+
+  <h2>Review personas — standalone, usable without the pack</h2>
+  <table>
+    <thead><tr><th>Agent</th><th>Role</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td><code>agent-skills:code-reviewer</code></td><td>Senior Staff Eng</td><td>Five-axis review — "would a staff engineer approve this?"</td></tr>
+      <tr><td><code>agent-skills:test-engineer</code></td><td>QA Specialist</td><td>Test strategy, coverage, the Prove-It pattern</td></tr>
+      <tr><td><code>agent-skills:security-auditor</code></td><td>Security Eng</td><td>Vuln detection, threat modeling, OWASP</td></tr>
+      <tr><td><code>agent-skills:web-performance-auditor</code></td><td>Web Perf Eng</td><td>Core Web Vitals audit, Quick/Deep, metric-honesty rule (via <code>/webperf</code>)</td></tr>
+    </tbody>
+  </table>
+  <p class="sub"><code>/ship</code> fans these four out in <b>parallel</b>, then merges to a go/no-go.</p>
+
+  <h2>What each has that the other lacks</h2>
+  <table>
+    <thead><tr><th>Addy-only (GSD has no per-skill equiv)</th><th>GSD-only (Addy has no equiv)</th></tr></thead>
+    <tbody>
+      <tr><td>
+        Anti-rationalization + Red Flags baked into every skill<br>
+        <code>doubt-driven-development</code> — in-flight adversarial + cross-model<br>
+        <code>deprecation-and-migration</code> — code-as-liability<br>
+        <code>observability-and-instrumentation</code> — RED/USE, OTel<br>
+        <code>source-driven-development</code> — cite official docs<br>
+        <code>api-and-interface-design</code> — contract-first, Hyrum's Law<br>
+        Web/frontend depth (browser, webperf, a11y)<br>
+        Multi-tool portability (not Claude-locked)
+      </td><td>
+        Project &amp; milestone lifecycle (new-project/milestone, roadmap, archive)<br>
+        Durable cross-session state (<code>.planning/</code>, threads, MemPalace)<br>
+        Goal-backward verification — <b>hard blocker</b><br>
+        Wave-based parallel execution + git worktrees<br>
+        AI-phase specs (AI-SPEC, eval-planner/auditor, framework-selector)<br>
+        UI-phase specs (UI-SPEC, ui-checker)<br>
+        Import/ingest with conflict detection<br>
+        Dozens of specialized subagents vs 4 personas
+      </td></tr>
+    </tbody>
+  </table>
+
+  <h2>For your stack (.NET backend, already on GSD) — graft, don't replace</h2>
+  <div class="rules">
+    <b>High-value to graft in:</b><br>
+    • <code>doubt-driven-development</code> — fits your byte-identical generator gates perfectly<br>
+    • <code>source-driven-development</code> — cite official docs for generator/Protobuf/Mongo decisions<br>
+    • <code>api-and-interface-design</code> — contract-first for the legacy reverse-map seams<br>
+    • <code>deprecation-and-migration</code> — PIES/rename work is deprecation territory<br>
+    • <code>observability-and-instrumentation</code> — RED/OTel for API + publishers<br>
+    • <code>code-simplification</code> — Chesterton's Fence on LegacyMapperGenerator<br>
+    • The 4 personas — run <code>agent-skills:code-reviewer</code> / <code>security-auditor</code> standalone on PRs
+  </div>
+  <div class="rules warn">
+    <b>Skip (web-only, no browser app here):</b> <code>browser-testing-with-devtools</code>, <code>frontend-ui-engineering</code>, <code>performance-optimization</code>, <code>webperf</code>.<br><br>
+    <b>Collision warning:</b> <code>/spec /plan /build /review /ship /test</code> are <b>bare</b> Addy commands; GSD is <code>/gsd-*</code> namespaced. They coexist on different tokens, but in this env those bare tokens resolve to <b>Addy</b>. Mean GSD? type the <code>/gsd-</code> prefix.
+  </div>
+
+  <div class="foot">
+    Markdown twin: <code>out/addy-agent-skills.md</code>. Reprint any time via <code>/am-skills-primer</code>.
+    Sources: <a href="https://github.com/addyosmani/agent-skills">github.com/addyosmani/agent-skills</a> · <a href="https://addyosmani.com/blog/agent-skills/">addyosmani.com/blog/agent-skills</a>.
+  </div>
+
+</div>
+</body>
+</html>

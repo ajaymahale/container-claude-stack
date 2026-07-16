@@ -65,22 +65,21 @@ container
 
 ## Syncing your claude config (`~/.claude`)
 
-The container mounts each machine's **own** `~/.claude` — plugins/skills/hooks come
-via that mount, not via this repo. To bring your ecosystem to a new machine, run on
-the **source** (full-setup) machine:
+The container mounts each machine's **own** `~/.claude`. Three layers, handled separately:
 
+**Skills** — source-tracked, not copied. `skills.yaml` lists the git repos (gstack,
+matt-pocock, gsd-core, context7, …); `personal-skills/` holds your authored skills
+(no upstream). On a fresh machine:
 ```bash
-scripts/sync-claude-config.sh                 # writes ~/claude-config.tgz
+scripts/install-claude-config.sh     # clones the 8 repos, symlinks sub-skills to top level, copies personal
 ```
+Updates: `git pull` in each cloned repo, or `scripts/update-plugins.sh` (auto-pulls all of `~/.claude/skills`).
 
-AirDrop/transfer `~/claude-config.tgz` to the target, then on the target:
-```bash
-mkdir -p ~/.claude && tar xzf ~/Downloads/claude-config.tgz -C "$HOME"
-```
+**Plugins** — install via marketplaces (`plugins.yaml`) using `/plugin` inside a claude session.
 
-The dynamic bridge absorbs the `/Users/<user>` path diff between machines. Caveat:
-shipped `node_modules` are the source machine's binaries — pure-JS plugins work;
-native ones (e.g. claude-mem's tree-sitter) may need a Linux rebuild in the container.
+**Text config** (CLAUDE.md, commands/, agents/) — `scripts/sync-claude-config.sh`
+bundles these for a one-time tarball transfer between machines. `settings.json` stays
+per-machine; the dynamic bridge absorbs the `/Users/<user>` path diff in-container.
 
 ## Updating the image (rebuild workflow)
 

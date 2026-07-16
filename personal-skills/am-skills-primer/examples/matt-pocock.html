@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matt Pocock Skills — Crash Course</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --ink:#e6edf3; --mut:#9aa7b4;
+    --line:#2a3340; --accent:#58a6ff; --code:#1f6feb22;
+    --setup:#8b949e; --discuss:#d29922; --proto:#a371f7; --spec:#58a6ff;
+    --plan:#3fb950; --exec:#db61a2; --test:#f0883e; --push:#2f81f7; --ramp:#56d4dd;
+    --ok:#3fb950; --warn:#d29922; --no:#f85149;
+  }
+  @media (prefers-color-scheme:light){
+    :root{--bg:#f6f8fa;--panel:#fff;--panel2:#f0f3f6;--ink:#1f2328;--mut:#57606a;--line:#d0d7de;--code:#ddf4ff;}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;}
+  .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:30px;margin:0 0 4px}
+  h2{font-size:20px;margin:40px 0 12px;border-bottom:1px solid var(--line);padding-bottom:6px}
+  .sub{color:var(--mut);margin:0 0 24px}
+  code{background:var(--code);padding:1px 6px;border-radius:5px;font:13px ui-monospace,SFMono-Regular,Menlo,monospace}
+  a{color:var(--accent)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--mut);margin:8px 0 0}
+  .pill{display:inline-block;font:600 11px ui-monospace,monospace;padding:1px 7px;border-radius:999px;color:#06121f}
+  .u{background:var(--spec)} .a{background:var(--mut)}
+  table{border-collapse:collapse;width:100%;margin:6px 0;font-size:14px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  tr:hover td{background:var(--panel2)}
+  .step{font:700 12px ui-monospace,monospace;color:#06121f;padding:2px 8px;border-radius:6px;white-space:nowrap}
+  .s0{background:var(--setup)} .s1{background:var(--discuss)} .s1b{background:var(--proto)}
+  .s2{background:var(--spec)} .s3{background:var(--plan)} .s4{background:var(--exec)}
+  .s5{background:var(--test)} .s6{background:var(--push)} .sr{background:var(--ramp)}
+  .rules{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:14px 18px;margin:16px 0}
+  .rules b{color:var(--ink)}
+  details{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin:8px 0;padding:0 14px}
+  details[open]{background:var(--panel2)}
+  summary{cursor:pointer;padding:11px 0;font-weight:600;list-style:none;display:flex;align-items:center;gap:10px}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"▸";color:var(--mut);font-size:12px}
+  details[open] summary::before{content:"▾"}
+  .body{padding:0 0 12px 22px;color:var(--mut)}
+  .body code{color:var(--ink)}
+  .rel{color:#06121f;font:600 11px ui-monospace,monospace;padding:1px 7px;border-radius:5px}
+  .ok{background:var(--ok)} .warn{background:var(--warn)} .no{background:var(--no)}
+  .foot{margin-top:40px;color:var(--mut);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Matt Pocock Skills — Crash Course</h1>
+  <p class="sub">23 skills from <a href="https://github.com/mattpocock/skills">mattpocock/skills</a>,
+  mapped onto <b>setup → discuss → spec → plan → execute → test → push</b>.</p>
+  <div class="legend">
+    <span><span class="pill u">/x</span> you type it (user-invoked)</span>
+    <span><span class="pill a">auto</span> model fires it (model-invoked)</span>
+  </div>
+
+  <h2>TL;DR — the flow</h2>
+  <table>
+    <thead><tr><th>Step</th><th>Skill(s)</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><span class="step s0">0 setup</span></td><td><code>/setup-matt-pocock-skills</code></td><td>One-time. Issue tracker, triage labels, docs location. Run before first use.</td></tr>
+      <tr><td><span class="step s1">1 discuss</span></td><td><code>/grill-with-docs</code> · <code>/grill-me</code></td><td>Relentless interview to sharpen the idea. <code>with-docs</code> = stateful (writes ADRs + glossary); <code>me</code> = stateless.</td></tr>
+      <tr><td><span class="step s1b">1b proto</span></td><td><code>/handoff</code> → <code>/prototype</code> → <code>/handoff</code></td><td>Optional detour when a question needs a <i>runnable</i> answer. Fork out, prototype, fork back.</td></tr>
+      <tr><td><span class="step s2">2 spec</span></td><td><code>/to-prd</code></td><td>Synthesises the conversation into a PRD on the tracker. No new interview.</td></tr>
+      <tr><td><span class="step s3">3 plan</span></td><td><code>/to-issues</code></td><td>Splits the PRD into independent, agent-grabbable issues (vertical slices).</td></tr>
+      <tr><td><span class="step s4">4 execute</span></td><td><code>/implement</code></td><td>Builds one issue/PRD. Pulls in <code>tdd</code>, <code>codebase-design</code>, <code>domain-modeling</code>.</td></tr>
+      <tr><td><span class="step s5">5 test</span></td><td><code>tdd</code> · <code>/diagnosing-bugs</code></td><td>Red-green-refactor for new work; disciplined diagnosis loop for hard bugs/regressions.</td></tr>
+      <tr><td><span class="step s6">6 push</span></td><td><code>/handoff</code> · <code>/improve-codebase-architecture</code> · <code>resolving-merge-conflicts</code> · <code>git-guardrails</code></td><td>Hand off across windows, keep architecture clean, land safely.</td></tr>
+      <tr><td><span class="step sr">on-ramp</span></td><td><code>/triage</code></td><td>For issues <i>you didn't create</i>. Categorise → verify → brief. Feeds <code>/implement</code>.</td></tr>
+      <tr><td><span class="step sr">router</span></td><td><code>/ask-matt</code></td><td>Forgot which skill? Ask it; it routes you.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="rules">
+    <b>Two rules that matter:</b><br>
+    1. Keep <b>discuss → spec → plan</b> in <i>one unbroken context window</i>. Don't <code>/compact</code> or clear before <code>/to-issues</code>.<br>
+    2. <code>/triage</code> is <b>only</b> for issues you didn't write. <code>/to-issues</code> output is already agent-ready — don't re-triage it.<br>
+    <br>
+    <code>/handoff</code> <b>forks</b> (new session, old preserved). <code>/compact</code> <b>continues</b> (same session). Handoff when near the smart-zone ceiling (~120k tokens) mid-flow.
+  </div>
+
+  <h2>Engineering — the flow skills</h2>
+  <details><summary><span class="pill u">/ask-matt</span> router</summary><div class="body">You don't remember which skill fits. Routes you over the user-invoked skills.</div></details>
+  <details><summary><span class="pill u">/setup-matt-pocock-skills</span> setup</summary><div class="body">First-time config of tracker / label vocabulary / domain doc layout. Run once.</div></details>
+  <details><summary><span class="pill u">/grill-with-docs</span> discuss</summary><div class="body">Codebase + want the interview to also produce ADRs and a glossary as you go.</div></details>
+  <details><summary><span class="pill u">/grill-me</span> discuss</summary><div class="body">Stress-test a plan with no codebase / nothing to persist. Stateless twin of grill-with-docs.</div></details>
+  <details><summary><span class="pill u">/prototype</span> discuss → detour</summary><div class="body">A design question is faster answered by running code — a terminal app for state/business-logic, or several toggleable UI variations from one route.</div></details>
+  <details><summary><span class="pill u">/to-prd</span> spec</summary><div class="body">Conversation is settled → turn it into a PRD and publish to the tracker.</div></details>
+  <details><summary><span class="pill u">/to-issues</span> plan</summary><div class="body">A PRD/plan needs slicing into independently-grabbable issues via tracer-bullet vertical slices.</div></details>
+  <details><summary><span class="pill u">/triage</span> on-ramp</summary><div class="body">Inbound bugs / external PRs you didn't author are piling up. Moves them through triage roles into agent-ready briefs.</div></details>
+  <details><summary><span class="pill u">/implement</span> execute</summary><div class="body">Build a specific issue or PRD — fresh session per issue.</div></details>
+  <details><summary><span class="pill a">tdd</span> execute / test</summary><div class="body">Build feature/fix test-first. Fires on "red-green-refactor" or a request for integration tests.</div></details>
+  <details><summary><span class="pill a">diagnosing-bugs</span> test / debug</summary><div class="body">Something's broken/throwing/slow and the cause isn't obvious. Say "diagnose" / "debug this".</div></details>
+  <details><summary><span class="pill a">codebase-design</span> execute</summary><div class="body">Designing or improving a module's interface — deep modules, where a seam goes, making code testable/AI-navigable.</div></details>
+  <details><summary><span class="pill a">domain-modeling</span> execute</summary><div class="body">Pin down domain terminology / ubiquitous language, or record an architectural decision.</div></details>
+  <details><summary><span class="pill u">/improve-codebase-architecture</span> upkeep</summary><div class="body">Periodic (every few days). Scans for deepening opportunities → visual HTML report → grills the one you pick.</div></details>
+  <details><summary><span class="pill a">resolving-merge-conflicts</span> push</summary><div class="body">An in-progress git merge/rebase has conflicts to resolve.</div></details>
+
+  <h2>Productivity — generic, not code-specific</h2>
+  <details><summary><span class="pill a">grilling</span></summary><div class="body">The reusable interview engine behind grill-me / grill-with-docs. Fires on any "grill" trigger.</div></details>
+  <details><summary><span class="pill u">/handoff</span></summary><div class="body">Compact the conversation into a handoff doc so another agent / fresh session picks up cleanly.</div></details>
+  <details><summary><span class="pill u">/teach</span></summary><div class="body">Learn a concept over time, using the current directory as workspace.</div></details>
+  <details><summary><span class="pill u">/writing-great-skills</span></summary><div class="body">Authoring/editing a skill — the vocabulary and principles that make one predictable.</div></details>
+
+  <h2>Misc — utilities (relevance flagged for a .NET shop)</h2>
+  <details><summary><span class="pill a">git-guardrails-claude-code</span> <span class="rel ok">useful</span></summary><div class="body">Block dangerous git (push / reset --hard / clean / branch -D) via Claude Code hooks. Language-agnostic — worth it here.</div></details>
+  <details><summary><span class="pill a">setup-pre-commit</span> <span class="rel warn">low</span></summary><div class="body">Husky + lint-staged + <b>Prettier</b> — a JS/TS toolchain. A .NET repo wants <code>dotnet format</code> / husky.net instead.</div></details>
+  <details><summary><span class="pill a">migrate-to-shoehorn</span> <span class="rel no">irrelevant</span></summary><div class="body">TypeScript-only — replaces <code>as</code> with <code>@total-typescript/shoehorn</code> in tests.</div></details>
+  <details><summary><span class="pill a">scaffold-exercises</span> <span class="rel no">irrelevant</span></summary><div class="body">Course/exercise authoring, not product work.</div></details>
+
+  <h2>How this relates to your GSD pipeline</h2>
+  <p class="sub">Matt's set is the lightweight, composable alternative to GSD — failure-mode patches, not a rigid phase machine. Don't run both for the same step.</p>
+  <table>
+    <thead><tr><th>Your GSD step</th><th>Matt equivalent</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><code>/gsd-discuss-phase</code></td><td><code>/grill-with-docs</code></td><td>Both interview-to-sharpen. Matt also writes ADRs/glossary inline.</td></tr>
+      <tr><td><code>/gsd-spec-phase</code></td><td><code>/to-prd</code></td><td>PRD synthesis.</td></tr>
+      <tr><td><code>/gsd-plan-phase</code></td><td><code>/to-issues</code></td><td>GSD = PLAN.md; Matt = tracker issues, vertical slices.</td></tr>
+      <tr><td><code>/gsd-execute-phase</code></td><td><code>/implement</code></td><td>GSD has worktree/atomic-commit machinery; Matt is leaner.</td></tr>
+      <tr><td><code>/gsd-add-tests</code>, <code>/gsd-debug</code></td><td><code>tdd</code>, <code>/diagnosing-bugs</code></td><td>—</td></tr>
+      <tr><td><code>/gsd-code-review</code></td><td>(no direct equiv)</td><td>Keep your GSD review / <code>am-code-audit</code>.</td></tr>
+    </tbody>
+  </table>
+  <p style="color:var(--mut)"><b>Reach for Matt</b> for fast, single-dev, tracker-driven work with minimal ceremony. <b>Stay on GSD</b> when you need phase gates, planning artifacts, and verification rigor.</p>
+
+  <div class="foot">
+    Markdown twin lives at <code>cheatsheet.md</code> in this folder. Reprint the flow any time with <code>/am-skills-primer</code>.
+  </div>
+
+</div>
+</body>
+</html>

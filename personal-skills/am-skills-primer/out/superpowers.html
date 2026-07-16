@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Superpowers — Cheatsheet vs GSD</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --ink:#e6edf3; --mut:#9aa7b4;
+    --line:#2a3340; --accent:#58a6ff; --code:#1f6feb22;
+    --setup:#8b949e; --discuss:#d29922; --proto:#a371f7; --spec:#58a6ff;
+    --plan:#3fb950; --exec:#db61a2; --test:#f0883e; --push:#2f81f7; --ramp:#56d4dd;
+    --ok:#3fb950; --warn:#d29922; --no:#f85149;
+  }
+  @media (prefers-color-scheme:light){
+    :root{--bg:#f6f8fa;--panel:#fff;--panel2:#f0f3f6;--ink:#1f2328;--mut:#57606a;--line:#d0d7de;--code:#ddf4ff;}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;}
+  .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:30px;margin:0 0 4px}
+  h2{font-size:20px;margin:40px 0 12px;border-bottom:1px solid var(--line);padding-bottom:6px}
+  .sub{color:var(--mut);margin:0 0 24px}
+  code{background:var(--code);padding:1px 6px;border-radius:5px;font:13px ui-monospace,SFMono-Regular,Menlo,monospace}
+  a{color:var(--accent)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--mut);margin:8px 0 0}
+  .pill{display:inline-block;font:600 11px ui-monospace,monospace;padding:1px 7px;border-radius:999px;color:#06121f}
+  .a{background:var(--spec)} .m{background:var(--mut)}
+  table{border-collapse:collapse;width:100%;margin:6px 0;font-size:14px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  tr:hover td{background:var(--panel2)}
+  .step{font:700 12px ui-monospace,monospace;color:#06121f;padding:2px 8px;border-radius:6px;white-space:nowrap}
+  .s0{background:var(--setup)} .s1{background:var(--spec)} .s2{background:var(--plan)}
+  .s3{background:var(--exec)} .s4{background:var(--test)} .s5{background:var(--push)} .sr{background:var(--ramp)}
+  .rules{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:14px 18px;margin:16px 0}
+  .rules.warn{border-left-color:var(--warn)}
+  .rules b{color:var(--ink)}
+  details{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin:8px 0;padding:0 14px}
+  details[open]{background:var(--panel2)}
+  summary{cursor:pointer;padding:11px 0;font-weight:600;list-style:none;display:flex;align-items:center;gap:10px}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"▸";color:var(--mut);font-size:12px}
+  details[open] summary::before{content:"▾"}
+  .body{padding:0 0 12px 22px;color:var(--mut)}
+  .body code{color:var(--ink)}
+  .rel{color:#06121f;font:600 11px ui-monospace,monospace;padding:1px 7px;border-radius:5px}
+  .ok{background:var(--ok)} .warn{background:var(--warn)} .no{background:var(--no)}
+  .foot{margin-top:40px;color:var(--mut);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font:12px/1.5 ui-monospace,monospace;color:var(--mut);margin:12px 0}
+  .note{color:var(--warn);font-size:12px}
+  .live{color:var(--ok);font-size:12px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Superpowers — vs GSD</h1>
+  <p class="sub">A complete development <b>methodology</b> for coding agents, built on composable skills that
+  <b>auto-trigger</b>. By Jesse Vincent (<a href="https://github.com/obra">obra</a> / Prime Radiant).
+  <span class="live">● ACTIVE in this session (v6.0.0, on disk).</span></p>
+  <p class="sub">Source: <a href="https://github.com/obra/superpowers">github.com/obra/superpowers</a> ·
+  disk: <code>~/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.0/skills/</code> (14 skills)</p>
+
+  <div class="rules">
+    <b>One-line:</b> Don't jump to code. <b>Socratic-brainstorm</b> a spec → show it in digestible chunks → sign
+    off → write a plan "clear enough for an enthusiastic junior engineer with poor taste, no judgement, no project
+    context, and an aversion to testing" → say "go" → <b>subagent-driven development</b>: fresh agents work each
+    task, inspected + reviewed, running autonomously for hours. <b>True red/green TDD, YAGNI, DRY.</b> Skills fire
+    automatically — "your agent just has Superpowers."
+  </div>
+
+<pre>  brainstorm → write-plan → worktree → subagent-driven-dev → test/debug → review → verify → finish-branch
+    Socratic      junior-clear   isolate    fresh agent/task        strict TDD   2-stage   must-run   /gsd-ship-equiv</pre>
+
+  <h2>The 14 skills — by phase</h2>
+  <p class="sub"><span class="pill a">auto</span> = skill auto-fires on trigger (all of Superpowers is auto/model-invoked). <span class="pill m">meta</span> = governs how skills are used.</p>
+
+  <details open><summary><span class="step s0">meta</span> &nbsp; using-superpowers</summary><div class="body"><b>The spine.</b> Forces a skill check before ANY response, including clarifying questions. "If there's even a 1% chance a skill applies, you MUST invoke it." This is what makes Superpowers ambient instead of slash-driven. <i>It's running right now.</i></div></details>
+
+  <details><summary><span class="step s1">define</span> &nbsp; brainstorming</summary><div class="body"><b>MANDATORY before any creative work</b> — features, components, functionality, behavior changes. Explores user intent + requirements + design before implementation. The Socratic spec-tease.</div></details>
+
+  <details><summary><span class="step s2">plan</span> &nbsp; writing-plans</summary><div class="body">Have a spec/requirements for a multi-step task, before touching code. Plan written junior-engineer-clear, emphasizing red/green TDD + YAGNI + DRY.</div></details>
+  <details><summary><span class="step s2">plan</span> &nbsp; executing-plans</summary><div class="body">Execute a written plan in a <i>separate session</i> with review checkpoints.</div></details>
+
+  <details><summary><span class="step sr">isolate</span> &nbsp; using-git-worktrees</summary><div class="body">Ensure an isolated workspace via a worktree before feature work or plan execution. <span class="note">(Worktrees are broken in your env — .planning gitignored — same reason you run GSD sequential-on-main.)</span></div></details>
+  <details><summary><span class="step sr">isolate</span> &nbsp; dispatching-parallel-agents</summary><div class="body">2+ independent tasks with no shared state / sequential deps. Fan out.</div></details>
+
+  <details><summary><span class="step s3">execute</span> &nbsp; subagent-driven-development</summary><div class="body"><b>Signature move.</b> Execute a plan's independent tasks in the current session by spawning fresh subagents per task, inspecting + reviewing each, continuing forward. Can run autonomously for hours without deviating from the plan.</div></details>
+  <details><summary><span class="step s3">execute</span> &nbsp; test-driven-development</summary><div class="body"><b>Strict.</b> Red-Green-Refactor. <b>Will delete prematurely-written code</b> to hold the line. Use before any implementation code.</div></details>
+  <details><summary><span class="step s4">debug</span> &nbsp; systematic-debugging</summary><div class="body">Any bug / test failure / unexpected behavior — before proposing fixes. Scientific method.</div></details>
+
+  <details><summary><span class="step s5">review</span> &nbsp; requesting-code-review</summary><div class="body">Completing tasks / major features / before merging — verify work meets requirements.</div></details>
+  <details><summary><span class="step s5">review</span> &nbsp; receiving-code-review</summary><div class="body">Receiving feedback before implementing it, esp. when unclear/technically questionable — requires technical evaluation, not blind application.</div></details>
+
+  <details><summary><span class="step sr">verify</span> &nbsp; verification-before-completion</summary><div class="body"><b>Before claiming done/fixed/passing</b> — must run verification commands + confirm output, never "seems right." Commits/PRs gated on it.</div></details>
+  <details><summary><span class="step sr">ship</span> &nbsp; finishing-a-development-branch</summary><div class="body">Implementation complete, tests pass — decide how to integrate (merge strategy, etc.).</div></details>
+
+  <details><summary><span class="step s0">meta</span> &nbsp; writing-skills <span class="rel ok">directly useful</span></summary><div class="body"><b>Skills-that-write-skills.</b> Creating/editing/verifying skills before deployment. You author <code>am-*</code> skills — this is the craft reference. <i>No GSD equivalent.</i></div></details>
+
+  <h2>Superpowers vs GSD — at a glance</h2>
+  <table>
+    <thead><tr><th>Dimension</th><th>Superpowers</th><th>GSD</th></tr></thead>
+    <tbody>
+      <tr><td><b>Invocation</b></td><td><b>auto-trigger</b> — skills fire on their own; <code>using-superpowers</code> forces check before any response</td><td>slash-driven <code>/gsd-*</code>; you invoke each phase</td></tr>
+      <tr><td><b>Entry friction</b></td><td>zero — "your agent just has Superpowers"</td><td>moderate — learn ~60 <code>/gsd-*</code> commands</td></tr>
+      <tr><td><b>Agent count</b></td><td>~14 composable skills</td><td>~60 commands + dozens of specialist subagents</td></tr>
+      <tr><td><b>Scope</b></td><td>single feature/build</td><td>project + milestone lifecycle</td></tr>
+      <tr><td><b>Execution</b></td><td>subagent-driven-development — fresh subagent per task, in-session, autonomous hours</td><td>wave-based parallel exec via executor subagents + worktrees</td></tr>
+      <tr><td><b>Review</b></td><td>two-stage: spec-compliance THEN code-quality</td><td><code>/gsd-code-review</code> (5-axis) + plan-checker + goal-backward verifier</td></tr>
+      <tr><td><b>Discipline anchor</b></td><td>strict TDD (deletes premature code) + verification-before-completion</td><td>goal-backward verification = <b>hard blocker</b>, decision-coverage gate</td></tr>
+      <tr><td><b>State / memory</b></td><td>stateless — plan + worktree are the state</td><td>heavy <code>.planning/</code> + MemPalace temporal KG, threads, capture/resume</td></tr>
+      <tr><td><b>Skill authoring</b></td><td><code>writing-skills</code> — self-extending</td><td>no native skill-authoring</td></tr>
+      <tr><td><b>Tool reach</b></td><td>multi-harness (Claude, Codex, Cursor, Gemini, Antigravity, Copilot CLI, OpenCode, Pi, Kimi, Factory Droid)</td><td>Claude-first</td></tr>
+      <tr><td><b>Best for</b></td><td>long autonomous reasoning-heavy runs; hand off, come back to reviewed result</td><td>durable multi-phase projects needing milestone governance + memory</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Phase mapping</h2>
+  <table>
+    <thead><tr><th>Superpowers</th><th>GSD</th></tr></thead>
+    <tbody>
+      <tr><td><code>brainstorming</code></td><td><code>/gsd-explore</code>, <code>/gsd-discuss-phase</code>, <code>/gsd-spec-phase</code></td></tr>
+      <tr><td><code>writing-plans</code></td><td><code>/gsd-plan-phase</code></td></tr>
+      <tr><td><code>using-git-worktrees</code></td><td>GSD execute-phase worktrees</td></tr>
+      <tr><td><code>subagent-driven-development</code> / <code>executing-plans</code></td><td><code>/gsd-execute-phase</code></td></tr>
+      <tr><td><code>test-driven-development</code></td><td><code>/gsd-execute-phase</code> + <code>/gsd-add-tests</code></td></tr>
+      <tr><td><code>systematic-debugging</code></td><td><code>/gsd-debug</code></td></tr>
+      <tr><td><code>requesting/receiving-code-review</code></td><td><code>/gsd-code-review</code></td></tr>
+      <tr><td><code>verification-before-completion</code></td><td><code>/gsd-verify-work</code> (goal-backward)</td></tr>
+      <tr><td><code>finishing-a-development-branch</code></td><td><code>/gsd-ship</code>, <code>/gsd-pr-branch</code></td></tr>
+      <tr><td><code>writing-skills</code></td><td><i>(no equiv — GSD doesn't author skills)</i></td></tr>
+      <tr><td><code>using-superpowers</code> (auto-trigger)</td><td><i>(no equiv — GSD is slash-driven)</i></td></tr>
+    </tbody>
+  </table>
+
+  <h2>What each has that the other lacks</h2>
+  <table>
+    <thead><tr><th>Superpowers-only</th><th>GSD-only</th></tr></thead>
+    <tbody>
+      <tr><td>
+        <b>Auto-trigger</b> — zero invocation friction<br>
+        <b>writing-skills</b> — self-extending methodology<br>
+        <b>Two-stage review</b> baked into the loop<br>
+        Strict TDD that <b>deletes premature code</b><br>
+        Truly multi-harness (10+ agents)
+      </td><td>
+        Project/milestone lifecycle + ROADMAP<br>
+        Durable cross-session memory (MemPalace, threads)<br>
+        Goal-backward verification = <b>hard blocker</b><br>
+        Decision-coverage gate<br>
+        AI-phase / UI-phase specializations<br>
+        Import/ingest with conflict detection<br>
+        <code>/gsd-progress</code> unified situational command
+      </td></tr>
+    </tbody>
+  </table>
+
+  <h2>For your stack (.NET backend, legacy reverse-map, already on GSD)</h2>
+  <div class="rules warn">
+    <b>It's GSD's closest sibling — overlap is high.</b> Both: subagents + worktrees + plans + TDD + verification.
+    Don't run both methodologies' planning in parallel — pick one spine. You're on GSD (durable memory, milestone
+    governance) → <b>stay on GSD</b>. Superpowers running ambiently here mostly <i>reinforces</i> GSD's discipline,
+    it doesn't replace it.
+  </div>
+  <div class="rules warn">
+    <b>Live tension to name:</b> Superpowers <b>mandates</b> brainstorming-before-creative-work + strict TDD
+    (deletes premature code). Ponytail (your active mode) says YAGNI / minimal / shortest-path. They coexist but
+    pull opposite directions on ceremony — when they conflict, <b>user instructions win</b> (Superpowers' own
+    priority rule), so Ponytail / explicit asks override the mandate.
+  </div>
+  <div class="rules">
+    <b>Transferable value over GSD:</b><br>
+    • <b><code>verification-before-completion</code></b> rigor — "run the command, show the output" before claiming done. Pairs with your post-phase test gate + byte-identical snapshot gates.<br>
+    • <b><code>systematic-debugging</code></b> — scientific-method debug loop (complements <code>/gsd-debug</code>).<br>
+    • <b><code>writing-skills</code></b> — directly useful; you author <code>am-*</code> skills, this is the craft reference GSD lacks.<br>
+    • <b>Two-stage review</b> pattern (spec-compliance then code-quality) — graftable onto <code>/gsd-code-review</code>.<br><br>
+    <b>Where GSD stays ahead:</b> memory/state (MemPalace, threads, capture/resume across sessions), milestone lifecycle, goal-backward hard-blocker verification. Superpowers is stateless by design.
+  </div>
+
+  <div class="foot">
+    Rendered by <code>/am-skills-primer superpowers</code>. On disk (v6.0.0) + researched from source.
+    Sources: <a href="https://github.com/obra/superpowers">github.com/obra/superpowers</a> ·
+    <a href="https://github.com/addyosmani/agent-skills/blob/main/docs/comparison.md">Addy's comparison.md</a> (Superpowers vs agent-skills vs Matt).
+  </div>
+
+</div>
+</body>
+</html>

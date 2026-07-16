@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BMAD Method — Cheatsheet vs GSD</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --ink:#e6edf3; --mut:#9aa7b4;
+    --line:#2a3340; --accent:#58a6ff; --code:#1f6feb22;
+    --setup:#8b949e; --discuss:#d29922; --proto:#a371f7; --spec:#58a6ff;
+    --plan:#3fb950; --exec:#db61a2; --test:#f0883e; --push:#2f81f7; --ramp:#56d4dd;
+    --ok:#3fb950; --warn:#d29922; --no:#f85149;
+  }
+  @media (prefers-color-scheme:light){
+    :root{--bg:#f6f8fa;--panel:#fff;--panel2:#f0f3f6;--ink:#1f2328;--mut:#57606a;--line:#d0d7de;--code:#ddf4ff;}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;}
+  .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:30px;margin:0 0 4px}
+  h2{font-size:20px;margin:40px 0 12px;border-bottom:1px solid var(--line);padding-bottom:6px}
+  .sub{color:var(--mut);margin:0 0 24px}
+  code{background:var(--code);padding:1px 6px;border-radius:5px;font:13px ui-monospace,SFMono-Regular,Menlo,monospace}
+  a{color:var(--accent)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--mut);margin:8px 0 0}
+  .pill{display:inline-block;font:600 11px ui-monospace,monospace;padding:1px 7px;border-radius:999px;color:#06121f}
+  table{border-collapse:collapse;width:100%;margin:6px 0;font-size:14px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  tr:hover td{background:var(--panel2)}
+  .step{font:700 12px ui-monospace,monospace;color:#06121f;padding:2px 8px;border-radius:6px;white-space:nowrap}
+  .s0{background:var(--setup)} .s1{background:var(--spec)} .s2{background:var(--plan)}
+  .s3{background:var(--exec)} .s4{background:var(--test)} .s5{background:var(--push)} .sr{background:var(--ramp)}
+  .rules{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:14px 18px;margin:16px 0}
+  .rules.warn{border-left-color:var(--warn)}
+  .rules b{color:var(--ink)}
+  details{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin:8px 0;padding:0 14px}
+  details[open]{background:var(--panel2)}
+  summary{cursor:pointer;padding:11px 0;font-weight:600;list-style:none;display:flex;align-items:center;gap:10px}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"▸";color:var(--mut);font-size:12px}
+  details[open] summary::before{content:"▾"}
+  .body{padding:0 0 12px 22px;color:var(--mut)}
+  .body code{color:var(--ink)}
+  .rel{color:#06121f;font:600 11px ui-monospace,monospace;padding:1px 7px;border-radius:5px}
+  .ok{background:var(--ok)} .warn{background:var(--warn)} .no{background:var(--no)}
+  .foot{margin-top:40px;color:var(--mut);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font:12px/1.5 ui-monospace,monospace;color:var(--mut);margin:12px 0}
+  .note{color:var(--warn);font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>BMAD Method — vs GSD</h1>
+  <p class="sub"><b>Breakthrough Method of Agile AI-Driven Development</b> ("Build More Architect Dreams"),
+  by <a href="https://github.com/bmad-code-org">bmad-code-org</a>. MIT, free. V6 = skills-architecture.
+  <span class="note">Not installed locally — researched from source.</span></p>
+  <p class="sub">Source: <a href="https://github.com/bmad-code-org/bmad-method">github.com/bmad-code-org/bmad-method</a> ·
+  <a href="https://docs.bmad-method.org">docs.bmad-method.org</a> · install: <code>npx bmad-method install</code></p>
+
+  <div class="rules">
+    <b>One-line:</b> BMAD simulates an entire <i>agile product team</i> as 6 named AI personas (PM, Architect,
+    Dev, UX, Analyst, Tech-Writer) who collaborate through structured workflows from brainstorm → PRD →
+    architecture → stories → code. Traditional AI "does the thinking for you"; BMAD personas <i>facilitate</i>
+    your thinking. The framework is <b>scale-adaptive</b> (bug-fix → enterprise) and <b>artifact-driven</b>
+    (PRD, Architecture, Epics, Stories — sharded for context).
+  </div>
+
+<pre>  ANALYSIS          PLAN            SOLUTIONING         IMPLEMENTATION
+ ┌───────┐       ┌───────┐         ┌──────────┐         ┌──────────────┐
+ │Analyst│ ───▶  │  PM   │ ───▶    │Architect │ ───▶    │  Developer   │
+ │ + Tech│       │  UX   │         │ (de-risk)│         │ Dev / QA /   │
+ │Writer │       │ PRD   │         │ Readiness│         │ Review / Sprint│
+ └───────┘       └───────┘         └──────────┘         └──────────────┘
+  Brief·PRFAQ      Epics·Stories     Architecture          Dev-Story·Auto
+  Research         UX design         Impl-Readiness        Quick-Dev·Code-Review
+  ───── meta: bmad-help (what's next?) · Party Mode (personas co-present) ─────</pre>
+
+  <h2>The 6 named agents (personas)</h2>
+  <p class="sub">Load an agent → it stays in character → switch tasks via short menu <b>trigger codes</b>. Or invoke the skill name directly.</p>
+  <table>
+    <thead><tr><th>Persona</th><th>Skill ID</th><th>Triggers</th><th>Primary workflows</th></tr></thead>
+    <tbody>
+      <tr><td><b>Analyst</b> "Mary"</td><td><code>bmad-agent-analyst</code></td><td><code>BP MR DR TR CB WB DP</code></td><td>Brainstorm, Market/Domain/Tech Research, Create Brief, PRFAQ Challenge, Document Project</td></tr>
+      <tr><td><b>Product Mgr</b> "John"</td><td><code>bmad-agent-pm</code></td><td><code>PRD CE IR CC</code></td><td>Create/Edit/Validate PRD, Epics &amp; Stories, Implementation Readiness, Correct Course</td></tr>
+      <tr><td><b>Architect</b> "Winston"</td><td><code>bmad-agent-architect</code></td><td><code>CA IR</code></td><td>Create Architecture, Implementation Readiness</td></tr>
+      <tr><td><b>Developer</b> "Amelia"</td><td><code>bmad-agent-dev</code></td><td><code>DS QD QA CR SP CS ER IN</code></td><td>Dev Story, Quick Dev, QA test-gen, Code Review, Sprint Planning, Create Story, Epic Retro, Forensic Investigation</td></tr>
+      <tr><td><b>UX Designer</b> "Sally"</td><td><code>bmad-agent-ux-designer</code></td><td><code>CU</code></td><td>Create UX Design</td></tr>
+      <tr><td><b>Tech Writer</b> "Paige"</td><td><code>bmad-agent-tech-writer</code></td><td><code>DP WD MG VD EC</code></td><td>Document Project, Write Doc, Mermaid Gen, Validate Doc, Explain Concept</td></tr>
+    </tbody>
+  </table>
+  <p class="sub">Two trigger types: <b>workflow</b> (just type the code, e.g. <code>PRD</code>) vs <b>conversational</b> (code + your description, e.g. <code>WD write a deploy guide</code>).</p>
+
+  <h2>Workflows by phase</h2>
+
+  <details open><summary><span class="step s0">meta</span> &nbsp; bmad-help</summary><div class="body">Context-aware "what's next" router. Ask <code>bmad-help I finished architecture, what now?</code>. The on-ramp — GSD's <code>/gsd-progress</code> equivalent.</div></details>
+
+  <details><summary><span class="step s1">analysis</span> &nbsp; Analyst + Tech Writer — <code>BP DR TR CB DP</code></summary><div class="body">
+    <b>Brainstorm / Product Brief / PRFAQ</b> (press-release FAQ), <b>Market/Domain/Technical Research</b>,
+    <b>Document Project</b> (full-scan or deep-dive of an existing codebase). Output: briefs + research that feed the PRD.
+    Skills: <code>bmad-brainstorm</code>·<code>bmad-product-brief</code>·<code>bmad-prfaq</code>·<code>bmad-document-project</code>.</div></details>
+
+  <details><summary><span class="step s2">plan</span> &nbsp; PM + UX — <code>PRD CE CU</code></summary><div class="body">
+    <b>Create / Edit / Validate PRD</b> (with headless validation + report), <b>Create Epics &amp; Stories</b>,
+    <b>Create UX Design</b> (design directions, wireframes, key screens, validation). Skills:
+    <code>bmad-create-prd</code>·<code>bmad-edit-prd</code>·<code>bmad-validate-prd</code>·<code>bmad-create-epics-and-stories</code>·<code>bmad-ux</code>.</div></details>
+
+  <details><summary><span class="step s3">solutioning</span> &nbsp; Architect — <code>CA IR</code></summary><div class="body">
+    <b>Create Architecture</b> with <i>adversarial review</i> (stress-test the design) + <b>Implementation
+    Readiness</b> gate (are we ready to build?) + <b>Generate Project Context</b>. This is BMAD's de-risk-upfront
+    phase — "architect dreams". Skills: <code>bmad-create-architecture</code>·<code>bmad-check-implementation-readiness</code>·<code>bmad-generate-project-context</code>.</div></details>
+
+  <details><summary><span class="step s4">implementation</span> &nbsp; Developer — <code>DS QD CR SP IN</code></summary><div class="body">
+    <b>Dev Story</b> (build one story), <b>Quick Dev</b> (scale-adaptive small task), <b>Dev Auto</b>
+    (autonomous dev loop), <b>Code Review</b>, <b>Sprint Planning/Status</b>, <b>Create Story</b>,
+    <b>QA generate E2E tests</b>, <b>Retrospective</b>, <b>Investigate / Forensic</b> (post-mortem),
+    <b>Correct Course</b>, <b>Checkpoint Preview</b>.</div></details>
+
+  <h2>Distinctive mechanisms</h2>
+  <table>
+    <thead><tr><th>Mechanism</th><th>What it is</th></tr></thead>
+    <tbody>
+      <tr><td><b>Party Mode</b></td><td>Multiple personas co-present in <i>one</i> session to collaborate / debate. GSD has no equivalent — its agents are spawned-per-job, not co-present.</td></tr>
+      <tr><td><b>Scale-Domain-Adaptive</b></td><td>Auto-adjusts planning depth: <code>quick-dev</code> for a bug fix, full solutioning for enterprise. Mirrors GSD <code>/gsd-quick</code> vs <code>/gsd-execute-phase</code>.</td></tr>
+      <tr><td><b>Adversarial Review</b></td><td>Architecture gets stress-tested before it stands. GSD's analog is plan-time cross-AI review.</td></tr>
+      <tr><td><b>Document Sharding</b></td><td>Large artifacts (PRD, Architecture) split into shards for context management. GSD uses per-phase files instead.</td></tr>
+      <tr><td><b>Implementation-Readiness Gate</b></td><td>Explicit "are we ready to build?" checkpoint before dev. GSD's analog = plan-checker + decision-coverage gate.</td></tr>
+      <tr><td><b>Web Bundles</b></td><td>Offload upfront planning (Brainstorm/PRD/UX/Research) to Gemini Gems / ChatGPT GPTs — flat-rate subscription vs metered IDE tokens. Bring artifacts back to IDE. <i>No GSD equiv.</i></td></tr>
+      <tr><td><b>Modules</b></td><td>Core BMM + BMad Builder (custom agents), Test Architect Enterprise (TEA), Game Dev (BMGD), Creative Intelligence (CIS).</td></tr>
+    </tbody>
+  </table>
+
+  <h2>BMAD vs GSD — at a glance</h2>
+  <table>
+    <thead><tr><th>Dimension</th><th>BMAD</th><th>GSD</th></tr></thead>
+    <tbody>
+      <tr><td><b>Core metaphor</b></td><td>Simulate an agile <i>product team</i> (named personas you converse with)</td><td>Planning + verification <i>methodology</i> (specialist subagents spawned per job)</td></tr>
+      <tr><td><b>Agents</b></td><td>6 persistent named personas (PM John, Architect Winston, Dev Amelia…), stay in character, menu-switch</td><td>Dozens of anonymous task-subagents (planner, executor, verifier, mapper…)</td></tr>
+      <tr><td><b>Where weight sits</b></td><td><b>Upfront</b> — Solutioning, adversarial architecture, readiness gate</td><td><b>At delivery</b> — goal-backward verification as hard blocker</td></tr>
+      <tr><td><b>Unit of work</b></td><td>Full product: Brainstorm → PRD → Architecture → Epic → Story → Dev</td><td>Phase within a milestone</td></tr>
+      <tr><td><b>Artifacts</b></td><td>Product docs: Brief, PRFAQ, PRD, Architecture, Epics, Stories (sharded)</td><td>Process docs: PROJECT.md, ROADMAP, per-phase SPEC/PLAN/VERIFICATION</td></tr>
+      <tr><td><b>Entry UX</b></td><td>Load agent → menu code (<code>PRD</code> <code>DS</code> <code>CA</code>); or skill name</td><td><code>/gsd-&lt;cmd&gt;</code> slash commands; unified <code>/gsd-progress</code></td></tr>
+      <tr><td><b>Multi-agent collab</b></td><td><b>Party Mode</b> — personas co-present, debate</td><td>Worktrees + workstreams (parallel streams); subagents not co-present</td></tr>
+      <tr><td><b>Memory / state</b></td><td>Project Context doc + sharded artifacts in repo</td><td><code>.planning/</code> + MemPalace temporal KG, threads, capture/resume</td></tr>
+      <tr><td><b>Autonomy</b></td><td><code>bmad-dev-auto</code> (autonomous dev loop)</td><td><code>/gsd-autonomous</code> (discuss→plan→execute per phase)</td></tr>
+      <tr><td><b>Quick path</b></td><td><code>quick-dev</code> / <code>QD</code></td><td><code>/gsd-quick</code>, <code>/gsd-fast</code></td></tr>
+      <tr><td><b>Verification</b></td><td>Impl-readiness gate, adversarial review, code-review, forensic investigation</td><td>Goal-backward verifier (hard blocker), plan-checker, decision-coverage gate</td></tr>
+      <tr><td><b>Tool reach</b></td><td>Multi-IDE (Claude Code, Cursor, Windsurf) + web bundles (Gemini/ChatGPT)</td><td>Claude Code-first</td></tr>
+      <tr><td><b>Orientation</b></td><td>Greenfield / new product, web-forward (UX, PRFAQ, market research)</td><td>Engineering on existing codebase, backend/enterprise</td></tr>
+      <tr><td><b>Best for</b></td><td>Building a new product wanting a full team simulation</td><td>Durable multi-phase planning + verification rigor on an existing system</td></tr>
+    </tbody>
+  </table>
+
+  <h2>What each has that the other lacks</h2>
+  <table>
+    <thead><tr><th>BMAD-only</th><th>GSD-only</th></tr></thead>
+    <tbody>
+      <tr><td>
+        Named personas you converse with + <b>Party Mode</b> debate<br>
+        <b>Solutioning</b> — adversarial architecture review, upfront de-risk<br>
+        <b>Implementation-Readiness</b> explicit gate<br>
+        Product-doc artifacts (PRFAQ, Product Brief, Epics, Stories)<br>
+        <b>Document sharding</b> for context mgmt<br>
+        <b>Web bundles</b> — offload planning to flat-rate Gemini/ChatGPT<br>
+        Module marketplace (TEA, Game Dev, Creative)<br>
+        Multi-IDE + web-LLM reach
+      </td><td>
+        Durable cross-session state (MemPalace, threads, capture/resume)<br>
+        Goal-backward verification as a <b>hard blocker</b><br>
+        Decision-coverage gate<br>
+        Wave-based parallel execution + git worktrees<br>
+        Milestone/roadmap lifecycle + audit-milestone<br>
+        AI-phase specs (AI-SPEC, eval-planner/auditor)<br>
+        UI-phase specs (UI-SPEC, ui-checker)<br>
+        Import/ingest with conflict detection
+      </td></tr>
+    </tbody>
+  </table>
+
+  <h2>For your stack (.NET backend, legacy reverse-map, already on GSD)</h2>
+  <div class="rules warn">
+    <b>Low direct fit.</b> BMAD is greenfield / web-product shaped (PRFAQ, UX, market research, product brief).
+    Your wow-pic work is incremental engineering on an established system, deep in GSD's durable
+    phase/milestone/verification loop — that's the better tool for it. <b>Don't migrate.</b>
+  </div>
+  <div class="rules">
+    <b>Transferable ideas worth stealing:</b><br>
+    • <b>Party Mode</b> — persona debate in one session for hard design calls (your DSL binding decisions)<br>
+    • <b>Adversarial architecture review</b> — pair with Addy's <code>doubt-driven-development</code> for the LegacyMapperGenerator<br>
+    • <b>Document sharding</b> — if any PRD/SPEC balloons past context<br>
+    • <b>Web bundles</b> — offload big upfront planning to a flat-rate Gemini/ChatGPT sub instead of metered IDE tokens<br>
+    • <b>Implementation-Readiness gate</b> — a lighter analog to GSD's plan-checker for greenfield spikes<br><br>
+    <b>If you ever go greenfield</b> (new service from scratch), BMAD is the stronger starting frame; GSD is the
+    stronger <i>delivery</i> frame. They're complementary by lifecycle stage, not substitutes.
+  </div>
+
+  <div class="foot">
+    Rendered by <code>/am-skills-primer bmad-method</code>. Not on disk — content from source only.
+    Sources: <a href="https://github.com/bmad-code-org/bmad-method">github.com/bmad-code-org/bmad-method</a> ·
+    <a href="https://docs.bmad-method.org">docs.bmad-method.org</a> ·
+    <a href="https://github.com/bmad-code-org/bmad-method/blob/main/docs/reference/agents.md">agents.md</a> ·
+    <a href="https://github.com/bmad-code-org/bmad-method/blob/main/docs/reference/commands.md">commands.md</a> ·
+    <a href="https://github.com/bmad-code-org/bmad-method/blob/main/docs/explanation/party-mode.md">party-mode.md</a>.
+  </div>
+
+</div>
+</body>
+</html>
