@@ -63,6 +63,25 @@ container
 #   which ccg ccm ccdideep ccd       # launchers on /usr/local/bin
 ```
 
+## Syncing your claude config (`~/.claude`)
+
+The container mounts each machine's **own** `~/.claude` — plugins/skills/hooks come
+via that mount, not via this repo. To bring your ecosystem to a new machine, run on
+the **source** (full-setup) machine:
+
+```bash
+scripts/sync-claude-config.sh                 # writes ~/claude-config.tgz
+```
+
+AirDrop/transfer `~/claude-config.tgz` to the target, then on the target:
+```bash
+mkdir -p ~/.claude && tar xzf ~/Downloads/claude-config.tgz -C "$HOME"
+```
+
+The dynamic bridge absorbs the `/Users/<user>` path diff between machines. Caveat:
+shipped `node_modules` are the source machine's binaries — pure-JS plugins work;
+native ones (e.g. claude-mem's tree-sitter) may need a Linux rebuild in the container.
+
 ## Updating the image (rebuild workflow)
 
 After editing `Dockerfile.User` or `bin-container/`, a rebuild alone is NOT enough —
