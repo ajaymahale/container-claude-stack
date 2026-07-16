@@ -14,3 +14,9 @@ providers.env
 # os / editor
 .DS_Store
 *.swp
+
+# no cert / key files in the repo
+*.pem
+*.key
+*.crt
+*.p12
