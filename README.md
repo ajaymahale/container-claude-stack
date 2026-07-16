@@ -75,7 +75,8 @@ scripts/install-claude-config.sh     # clones the 8 repos, symlinks sub-skills t
 ```
 Updates: `git pull` in each cloned repo, or `scripts/update-plugins.sh` (auto-pulls all of `~/.claude/skills`).
 
-**Plugins** — install via marketplaces (`plugins.yaml`) using `/plugin` inside a claude session.
+**Plugins** — `scripts/install-plugins.sh` runs the non-interactive `claude plugin` CLI
+(`marketplace add` + `install`) from `plugins.yaml` — 8 marketplaces + 17 plugins, no menu.
 
 **Text config** (CLAUDE.md, commands/, agents/) — `scripts/sync-claude-config.sh`
 bundles these for a one-time tarball transfer between machines. `settings.json` stays
