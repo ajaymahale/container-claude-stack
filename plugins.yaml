@@ -1,48 +1,34 @@
-# claude-stack plugin/skill catalog — reference for what's installed + how it updates.
-# Auto-update: scripts/update-plugins.sh git-pulls every .git under
-# ~/.claude/skills and ~/.claude/plugins/marketplaces (weekly via launchd).
-# claude-managed plugin BINARIES update via the `/plugin` command (manual;
-# the script prints a reminder).
+# claude plugin marketplaces + plugins. install-plugins.sh reads this and runs the
+# NON-INTERACTIVE claude plugin CLI (claude plugin marketplace add / install).
+# Re-run install-plugins.sh after edits — already-added/installed are skipped.
+#
+# (superwhisper intentionally excluded.)
 
-marketplaces:            # git repos under ~/.claude/plugins/marketplaces — auto git-pull
-  - addy-agent-skills
-  - caveman
-  - claude-plugins-official
-  - dotnet-skills
-  - last30days-skill
-  - ponytail
-  - thedotmack          # claude-mem
-  - understand-anything
+marketplaces:               # claude plugin marketplace add <source>
+  - anthropics/claude-plugins-official   # claude-plugins-official
+  - addyosmani/agent-skills              # addy-agent-skills
+  - JuliusBrussee/caveman                # caveman
+  - Aaronontheweb/dotnet-skills          # dotnet-skills
+  - Lum1104/Understand-Anything          # understand-anything
+  - mvanhorn/last30days-skill            # last30days-skill
+  - DietrichGebert/ponytail              # ponytail
+  - thedotmack/claude-mem                # thedotmack
 
-plugins_installed:       # under ~/.claude/plugins/cache — update via /plugin
-  - understand-anything
-  - ponytail
-  - dotnet-skills
-  - agent-skills        # from addy-agent-skills
-  - last30days
-  - claude-mem          # from thedotmack
-  - caveman
-  # from claude-plugins-official:
-  - typescript-lsp
-  - context7
-  - code-review
-  - csharp-lsp
-  - mongodb
-  - pr-review-toolkit
-  - frontend-design
-  - explanatory-output-style
-  - superpowers
-  - code-simplifier
-
-skills_git:              # ~/.claude/skills/* (git repos) — auto-discovered + git-pull
-  note: |
-    update-plugins.sh finds these automatically (any dir with a .git). Includes
-    am-*, gsd-*, design-*, graphify, browse, tdd, etc. (~40 dirs). No need to
-    enumerate here — the FS is the source of truth.
-
-hooks:
-  note: |
-    17 hooks in ~/.claude/settings.json, all host-workflow (gsd flow, rtk token
-    optimization, graphify wow-pic graph, claudio sound). They ERROR in-container
-    (host paths /Users/amahale/* + host-only binaries). None are useful in a
-    generic dev container. Reconciliation options in docs/HOOKS.md.
+plugins:                    # claude plugin install <plugin>@<marketplace>
+  - agent-skills@addy-agent-skills
+  - caveman@caveman
+  - claude-mem@thedotmack
+  - code-review@claude-plugins-official
+  - code-simplifier@claude-plugins-official
+  - context7@claude-plugins-official
+  - csharp-lsp@claude-plugins-official
+  - dotnet-skills@dotnet-skills
+  - explanatory-output-style@claude-plugins-official
+  - frontend-design@claude-plugins-official
+  - last30days@last30days-skill
+  - mongodb@claude-plugins-official
+  - ponytail@ponytail
+  - pr-review-toolkit@claude-plugins-official
+  - superpowers@claude-plugins-official
+  - typescript-lsp@claude-plugins-official
+  - understand-anything@understand-anything
