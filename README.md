@@ -102,8 +102,17 @@ Gotchas learned during P1:
   `/root/.local/share/claude`, which is **mounted from the macOS host** at runtime
   (host Mach-O → `Exec format error`). `Dockerfile.User` relocates the Linux
   binary to `/opt/claude` and repoints the symlink. Don't drop that step.
-- **bun / herdr** — install to paths outside the harness-config mounts
-  (`/root/.bun`, `/root/.local/bin`) so they survive runtime.
+- **bun** — `/root/.bun` is NOT outside the mounts: the `bun` entry in
+  `enabledTools` bind-mounts the host `~/.bun` over it, shadowing the baked
+  install so hooks fail `Bun not found`. Same bug as the claude binary above.
+  Fixed both ends — bun bakes to `/opt/bun`, and `bun` is dropped from
+  `enabledTools`. Never re-add it: a macOS bun can't run in a Linux container.
+- **herdr** — installs to `/root/.local/bin`, which genuinely is outside the
+  mounts (the harness mounts `~/.local/share/claude` and `~/.local/state/claude`,
+  not `~/.local/bin`), so it survives runtime.
+- **Check before trusting a path** — `grep ' /root' /proc/mounts` inside the
+  container lists what the host actually shadows. Both bugs above came from
+  assuming a path was un-mounted.
 
 ## Shared brain (cross-container SQLite) — P3
 

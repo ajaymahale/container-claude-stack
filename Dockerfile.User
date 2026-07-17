@@ -11,9 +11,14 @@ RUN apt-get update \
 ENV PATH="/root/.local/bin:${PATH}"
 
 # ── bun (claude-mem runtime) ─────────────────────────────────────────────────
+# NOT /root/.bun — that path is a harness mount zone (enabledTools: "bun" bind-
+# mounts the host ~/.bun over it), which shadowed the baked install and left every
+# claude-mem hook failing "Bun not found". Same class of bug as the claude binary
+# below, so same fix: bake outside the mounted zone. A host bun can never work
+# here anyway — it's a macOS Mach-O binary.
+ENV BUN_INSTALL="/opt/bun"
 RUN curl -fsSL https://bun.sh/install | bash
-ENV BUN_INSTALL="/root/.bun"
-ENV PATH="/root/.bun/bin:${PATH}"
+ENV PATH="/opt/bun/bin:${PATH}"
 
 # ── claude binary (relocate Linux build out of the macOS-mounted zone) ───────
 RUN mkdir -p /opt/claude \
@@ -48,12 +53,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends build-essential
  && rm -rf /var/lib/apt/lists/*
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# Plugin hook commands (e.g. caveman's UserPromptSubmit) execute with a PATH that
-# may not inherit the ENV PATH above, so /root/.bun/bin and /root/.cargo/bin aren't
-# always visible to hooks. Symlink the hook-dependent tools into /usr/local/bin
-# (always on PATH) so plugins find bun/rtk regardless of the exec context.
-RUN ln -sfn /root/.bun/bin/bun /usr/local/bin/bun \
- && ln -sfn /root/.cargo/bin/rtk /usr/local/bin/rtk
+# Plugin hook commands (e.g. claude-mem's UserPromptSubmit) execute with a PATH
+# that may not inherit the ENV PATH above, so /opt/bun/bin and /root/.cargo/bin
+# aren't always visible to hooks. Symlink the hook-dependent tools into
+# /usr/local/bin (always on PATH) so plugins find bun/rtk regardless of exec
+# context. Targets must sit outside the harness mount zones or these dangle.
+RUN ln -sfn /opt/bun/bin/bun /usr/local/bin/bun \
+ && ln -sfn /root/.cargo/bin/rtk /usr/local/bin/rtk \
+ && bun --version && rtk --version
 
 # Host-path bridge is DYNAMIC: bin-container/bridge-host-paths.sh, called from
 # /root/.bashrc at container start. It reads THIS machine's settings.json and

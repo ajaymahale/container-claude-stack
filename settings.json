@@ -1,5 +1,6 @@
 {
   "_comment": "TEMPLATE ONLY — do not symlink over the live ~/.code-container/settings.json. `container init` owns `runtime` (per-machine: podman on work Mac, docker/OrbStack on home laptop) plus internal version fields. This file documents the other keys.",
+  "_comment_bun": "Do NOT add \"bun\" to enabledTools. That tool bind-mounts the host ~/.bun onto /root/.bun, which is useless (host bun is a macOS Mach-O binary) and actively harmful: an empty or absent host ~/.bun shadows the image's bun and every claude-mem hook dies with 'Bun not found'. Dockerfile.User bakes bun at /opt/bun instead.",
   "runtime": "podman",
   "enabledHarnesses": ["claude"],
   "enabledTools": [
@@ -7,7 +8,6 @@
     "git-config",
     "vim-config",
     "python",
-    "bun",
     "enhanced-tools"
   ],
   "systemMounts": {
