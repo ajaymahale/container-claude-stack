@@ -16,6 +16,10 @@ YAML="$ROOT/plugins.yaml"
 # silently failed to add and the only signal was an empty `plugin list`.)
 run_cli() {   # $1 = label, rest = claude plugin args
   printf '  %s\n' "$1"
+  shift                                   # drop the label — without this it was
+                                          # passed to the CLI as the subcommand,
+                                          # and every call died with
+                                          # "unknown command '<label>'"
   out=$(claude plugin "$@" 2>&1); rc=$?
   if printf '%s' "$out" | grep -qiE 'already|no changes|up to date|nothing to'; then
     printf '    \033[33m·\033[0m already done\n'
