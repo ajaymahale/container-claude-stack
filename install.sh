@@ -103,6 +103,14 @@ t0=$SECONDS
 container build user || die "image build failed"
 ok "image built in $((SECONDS - t0))s"
 
+# A rebuild alone is NOT enough: `container` re-attaches to the existing
+# per-project container, which still runs the OLD image — so a freshly built fix
+# looks like it never applied. Drop the stale container so the next `cc-launch`
+# creates one from the image just built. Safe: the project is a host mount and
+# in-container state is disposable (same rationale as cc-launch's own remove).
+container remove >/dev/null 2>&1 && ok "stale container removed (recreates on launch)" \
+                                 || skip "no stale container to remove"
+
 # ---- 7. enter ----
 step "enter the container"
 printf "  Ready. Enter with:\n    ${c_dim}cc-launch${c_off}   (or ${c_dim}%s/bin/cc-launch${c_off})\n" "$ROOT"

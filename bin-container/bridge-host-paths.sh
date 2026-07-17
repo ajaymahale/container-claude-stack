@@ -17,7 +17,11 @@ S=/root/.claude/settings.json
 home=""
 for f in "$S" /root/.claude/plugins/*.json; do
   [ -f "$f" ] || continue
-  m=$(grep -oE '/(Users|home)/[^/"]+' "$f" 2>/dev/null | sort -u | head -1 | grep -oE '^/(Users|home)/[^/]+')
+  # `|| true` is load-bearing: under `set -e` a no-match grep (exit 1) inside a
+  # command substitution aborts the whole script. Without it the scan dies on the
+  # first hooks-free settings.json and never reaches the plugins/*.json that
+  # actually carry the host path — leaving every plugin's installPath dangling.
+  m=$(grep -oE '/(Users|home)/[^/"]+' "$f" 2>/dev/null | sort -u | head -1 | grep -oE '^/(Users|home)/[^/]+') || true
   [ -n "$m" ] && { home="$m"; break; }
 done
 
