@@ -1,0 +1,9 @@
+{
+  "_comment": "Portable slice of ~/.claude/settings.json. install.sh MERGES these keys into the live file (creating it if absent) and leaves every other key alone. Keys starting with _ are stripped, not merged. Deliberately excluded: enabledPlugins + extraKnownMarketplaces (scripts/install-plugins.sh owns those, from plugins.yaml) and skipDangerousModePermissionPrompt (per-machine consent, not config).",
+  "_comment_statusline": "$HOME, never /root — the same file is read by claude on the macOS host AND inside the container, where $HOME is /root. A hardcoded /root path renders nothing on the host. gsd-statusline.js needs compiled libs that install-claude-config.sh builds; without that build it throws Cannot find module and the whole chain renders empty.",
+  "statusLine": {
+    "type": "command",
+    "command": "node \"$HOME/.claude/skills/gsd-core/hooks/gsd-statusline.js\"; printf \" | \"; bash \"$HOME/.claude/plugins/cache/caveman/caveman/0d95a81d35a9/src/hooks/caveman-statusline.sh\"; printf \" \"; bash \"$HOME/.claude/plugins/cache/ponytail/ponytail/4.8.4/hooks/ponytail-statusline.sh\""
+  },
+  "theme": "dark"
+}

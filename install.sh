@@ -97,6 +97,27 @@ else
   ok "configs/.claude → ~/.claude (container sees live host config)"
 fi
 
+# Merge the repo's portable settings slice (statusLine, theme) into live
+# ~/.claude/settings.json. MERGE, not overwrite: enabledPlugins and friends are
+# owned by install-plugins.sh / the user and must survive untouched.
+python3 - "$ROOT/claude-settings.json" "$HOME/.claude/settings.json" <<'PY'
+import json, pathlib, sys
+src, dst = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
+incoming = {k: v for k, v in json.loads(src.read_text()).items() if not k.startswith("_")}
+dst.parent.mkdir(parents=True, exist_ok=True)
+current = json.loads(dst.read_text()) if dst.exists() else {}
+if all(current.get(k) == v for k, v in incoming.items()):
+    sys.exit(0)
+current.update(incoming)
+dst.write_text(json.dumps(current, indent=2) + "\n")
+sys.exit(10)
+PY
+case $? in
+  10) ok "~/.claude/settings.json merged (statusLine + theme)" ;;
+   0) skip "~/.claude/settings.json already current" ;;
+   *) warn "settings merge failed — statusline may not render" ;;
+esac
+
 # ---- 6. build image ----
 step "build image  (~10-15 min first time; rtk compiles from source)"
 t0=$SECONDS
