@@ -4,6 +4,7 @@
 #   1. Clone online skill repos (skills.yaml), shallow, into ~/.claude/skills/<name>/
 #      and symlink each sub-skill to the top level (claude discovers top-level skills).
 #   2. Copy authored skills (personal-skills/) — these have no upstream.
+#   3. Build gsd-core (its statusline needs compiled libs the clone doesn't ship).
 # Plugins install separately via /plugin using plugins.yaml (marketplaces).
 #
 # Re-runnable: existing clones are git-pulled; existing symlinks/personal skills
@@ -36,6 +37,25 @@ done < <(awk '/- name:/{n=$3} /url:/{if(n){print n" "$2; n=""}}' "$ROOT/skills.y
 if [ -d "$ROOT/personal-skills" ]; then
   echo "  copy    personal-skills/"
   cp -r "$ROOT/personal-skills/." "$SKILLS/"
+fi
+
+# 3. gsd-core build — its hooks/gsd-statusline.js requires bin/lib/*.cjs that exist
+# only as TypeScript source (src/*.cts) in the clone. Without a build the statusline
+# throws "Cannot find module ../gsd-core/bin/lib/semver-compare.cjs" on every render.
+# Runs after the clone/pull above so a pulled source change gets recompiled.
+GSD="$SKILLS/gsd-core"
+if [ -f "$GSD/package.json" ]; then
+  echo "  build   gsd-core (statusline libs)"
+  # build:lib is `tsc -p tsconfig.build.json` (incremental). If the emitted .cjs are
+  # gone but tsconfig.build.tsbuildinfo survives, tsc reports "Build complete" and
+  # exits 0 while emitting NOTHING. Drop the cache so the build always emits.
+  rm -f "$GSD/tsconfig.build.tsbuildinfo"
+  (cd "$GSD" && npm install --silent && npm run build) >/dev/null 2>&1 || true
+  # Verify the artifact, not the exit code — see above, exit 0 proves nothing here.
+  if [ ! -f "$GSD/gsd-core/bin/lib/semver-compare.cjs" ]; then
+    echo "    (build produced no libs — gsd statusline will not render;"
+    echo "     debug with: cd $GSD && npm install && npm run build)"
+  fi
 fi
 
 echo
