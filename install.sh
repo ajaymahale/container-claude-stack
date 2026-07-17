@@ -65,12 +65,29 @@ else
 fi
 
 # ---- 5. wire config into build context ----
-step "wire config (Dockerfile.User + bin-container → ~/.code-container)"
+step "wire config (Dockerfile.User + bin-container + live .claude link)"
 mkdir -p "$HOME/.code-container"
 cp "$ROOT/Dockerfile.User" "$HOME/.code-container/Dockerfile.User"
 rm -rf "$HOME/.code-container/bin-container"
 cp -r "$ROOT/bin-container" "$HOME/.code-container/bin-container"
 ok "config copied (real files — runtime-portable)"
+
+# The container bind-mounts configs/.claude at /root/.claude, but container init
+# only snapshots ~/.claude into it ONCE (skip-if-exists) and never refreshes — so
+# skills/plugins installed after init never reach the container. Replace the
+# snapshot with a symlink to live ~/.claude: one dir, live in both, no rebuild.
+CLINK="$HOME/.code-container/configs/.claude"
+mkdir -p "$HOME/.code-container/configs"
+if [ -e "$CLINK" ] && [ ! -L "$CLINK" ]; then
+  mv "$CLINK" "$CLINK.stale.$(date +%s)"
+  warn "shelved stale snapshot → configs/.claude.stale.*"
+fi
+if [ -L "$CLINK" ]; then
+  skip "configs/.claude already → ~/.claude"
+else
+  ln -s "$HOME/.claude" "$CLINK"
+  ok "configs/.claude → ~/.claude (container sees live host config)"
+fi
 
 # ---- 6. build image ----
 step "build image  (~10-15 min first time; rtk compiles from source)"

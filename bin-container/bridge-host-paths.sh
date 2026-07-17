@@ -1,22 +1,32 @@
 #!/usr/bin/env bash
-# bridge-host-paths.sh — make the mounted ~/.claude/settings.json hook commands
-# resolve in-container, PORTABLY. Reads whatever host paths THIS machine's
-# settings.json references (username / node-version agnostic) and symlinks each
-# to its container equivalent. Called from /root/.bashrc at container start.
+# bridge-host-paths.sh — make mounted ~/.claude paths resolve in-container,
+# PORTABLY. Reads host paths from settings.json (hook commands) AND plugin
+# metadata (installed_plugins.json / known_marketplaces.json installPaths) and
+# symlinks each to its container equivalent. Called from /root/.bashrc at start.
 #
 # Same image works on work Mac (amahale) and home laptop (ajaymahale): the bridge
-# mirrors each machine's own settings.json paths. Idempotent — safe per shell.
+# mirrors each machine's own paths. Idempotent — safe per shell.
 set -e
 S=/root/.claude/settings.json
-[ -f "$S" ] || exit 0
 
-# Host home dir = /Users/<x> or /home/<x> prefix in any hook command.
-home=$(grep -oE '/(Users|home)/[^/"]+' "$S" 2>/dev/null \
-       | sort -u | head -1 \
-       | grep -oE '^/(Users|home)/[^/]+')
+# Host home dir = /Users/<x> or /home/<x> prefix, found in ANY file that carries
+# absolute paths. settings.json had them when hooks lived there; now that it's
+# hooks-free, plugin metadata (plugins/*.json with absolute installPaths) is where
+# they live. Scan settings.json + every plugins/*.json so the symlink is always
+# created regardless of which file holds the paths.
+home=""
+for f in "$S" /root/.claude/plugins/*.json; do
+  [ -f "$f" ] || continue
+  m=$(grep -oE '/(Users|home)/[^/"]+' "$f" 2>/dev/null | sort -u | head -1 | grep -oE '^/(Users|home)/[^/]+')
+  [ -n "$m" ] && { home="$m"; break; }
+done
 
 if [ -n "$home" ]; then
-  # ~/.claude -> /root/.claude (where the mount actually lives at runtime)
+  # /Users/<hostuser> is baked into the image for the work Mac only (node path);
+  # create it on other machines so the symlink below can land inside it.
+  mkdir -p "$home"
+  # ~/.claude -> /root/.claude (where the mount lives). Makes the absolute paths
+  # in plugin metadata resolve, so all marketplace plugins load.
   ln -sfn /root/.claude "$home/.claude"
   # claudio -> BEL emitter (containers have no audio; the bell reaches the host TTY)
   mkdir -p "$home/go/bin"

@@ -36,7 +36,10 @@ Transfer $OUT to the target machine (AirDrop / scp / USB), then ON THE TARGET:
   cc-launch        # re-enter the container; plugins/skills/hooks are now mounted
 
 Notes:
-  - The dynamic bridge absorbs the /Users/<user> path diff between machines.
+  - The dynamic bridge (bin-container/bridge-host-paths.sh) symlinks /Users/<user>
+    paths found in settings.json + plugins/*.json (absolute installPaths) so they
+    resolve in the container. Scan widened beyond settings.json once plugin
+    metadata, not hooks, became where those paths live.
   - node_modules ship as the SOURCE machine's binaries. Pure-JS plugins work;
     native-module plugins (e.g. claude-mem tree-sitter) may need a Linux rebuild
     in the target container.

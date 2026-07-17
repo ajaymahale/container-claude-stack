@@ -11,6 +11,22 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 YAML="$ROOT/plugins.yaml"
 [ -f "$YAML" ] || { echo "plugins.yaml not found at $YAML"; exit 1; }
 
+# Run a claude-plugin CLI call, surface a clear result, NEVER hide failures.
+# (The old `| grep -viE ... || true` swallowed real errors — marketplaces
+# silently failed to add and the only signal was an empty `plugin list`.)
+run_cli() {   # $1 = label, rest = claude plugin args
+  printf '  %s\n' "$1"
+  out=$(claude plugin "$@" 2>&1); rc=$?
+  if printf '%s' "$out" | grep -qiE 'already|no changes|up to date|nothing to'; then
+    printf '    \033[33m·\033[0m already done\n'
+  elif [ "$rc" -ne 0 ]; then
+    printf '    \033[31m✗\033[0m FAILED (exit %d):\n' "$rc"
+    printf '%s\n' "$out" | sed 's/^/      /'
+  else
+    printf '    \033[32m✓\033[0m ok\n'
+  fi
+}
+
 section=""
 echo "== marketplaces =="
 while IFS= read -r line; do
@@ -24,10 +40,8 @@ while IFS= read -r line; do
       item="$(printf '%s' "$item" | xargs)"     # trim whitespace
       [ -z "$item" ] && continue
       case "$section" in
-        mkt)  printf '  marketplace add  %s\n' "$item"
-              claude plugin marketplace add "$item" 2>&1 | grep -viE 'already|exist' || true ;;
-        plug) printf '  install          %s\n' "$item"
-              claude plugin install "$item" 2>&1 | grep -viE 'already|installed|no changes|up to date' || true ;;
+        mkt)  run_cli "marketplace add  $item" marketplace add "$item" ;;
+        plug) run_cli "install          $item" install "$item" ;;
       esac
       ;;
   esac

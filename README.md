@@ -80,7 +80,9 @@ Updates: `git pull` in each cloned repo, or `scripts/update-plugins.sh` (auto-pu
 
 **Text config** (CLAUDE.md, commands/, agents/) — `scripts/sync-claude-config.sh`
 bundles these for a one-time tarball transfer between machines. `settings.json` stays
-per-machine; the dynamic bridge absorbs the `/Users/<user>` path diff in-container.
+per-machine; the dynamic bridge (`bin-container/bridge-host-paths.sh`) absorbs the
+`/Users/<user>` path diff in-container by symlinking host paths found in
+`settings.json` and `plugins/*.json` (plugin metadata carries absolute installPaths).
 
 ## Updating the image (rebuild workflow)
 
