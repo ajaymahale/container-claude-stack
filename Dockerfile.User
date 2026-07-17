@@ -48,6 +48,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends build-essential
  && rm -rf /var/lib/apt/lists/*
 ENV PATH="/root/.cargo/bin:${PATH}"
 
+# Plugin hook commands (e.g. caveman's UserPromptSubmit) execute with a PATH that
+# may not inherit the ENV PATH above, so /root/.bun/bin and /root/.cargo/bin aren't
+# always visible to hooks. Symlink the hook-dependent tools into /usr/local/bin
+# (always on PATH) so plugins find bun/rtk regardless of the exec context.
+RUN ln -sfn /root/.bun/bin/bun /usr/local/bin/bun \
+ && ln -sfn /root/.cargo/bin/rtk /usr/local/bin/rtk
+
 # Host-path bridge is DYNAMIC: bin-container/bridge-host-paths.sh, called from
 # /root/.bashrc at container start. It reads THIS machine's settings.json and
 # symlinks whatever host paths the hooks reference (~/.claude, the node path at

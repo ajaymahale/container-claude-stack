@@ -27,6 +27,14 @@ step "pre-flight checks"
 for b in git node npm claude; do
   command -v "$b" >/dev/null 2>&1 && ok "$b" || die "missing dependency: $b — install it first"
 done
+# bun — plugin hooks (caveman, ponytail, claude-mem) require it; install if missing
+# so the host matches the image (where bun is baked).
+command -v bun >/dev/null 2>&1 && ok "bun" || {
+  warn "bun missing — installing (plugin hooks require it)"
+  curl -fsSL https://bun.sh/install | bash >/dev/null 2>&1 || die "bun install failed"
+  export PATH="$HOME/.bun/bin:$PATH"
+  ok "bun installed (restart shell if not yet on PATH)"
+}
 command -v container >/dev/null 2>&1 || {
   warn "container tool missing — installing @aerovato/container"
   npm install -g @aerovato/container || die "npm install -g @aerovato/container failed"
