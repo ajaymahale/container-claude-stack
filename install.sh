@@ -6,7 +6,7 @@
 # Usage:  ./install.sh     (after cloning the repo)
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-TOTAL=7; STEP=0
+TOTAL=8; STEP=0
 
 c_ok='\033[32m'; c_skip='\033[33m'; c_err='\033[31m'; c_dim='\033[2m'; c_off='\033[0m'
 step() { STEP=$((STEP+1)); echo; printf '======== [%d/%d] %s ========\n' "$STEP" "$TOTAL" "$1"; }
@@ -63,7 +63,14 @@ else
   "$ROOT/secrets/secrets.bootstrap.sh" || warn "token entry incomplete — re-run secrets/secrets.bootstrap.sh later"
 fi
 
-# ---- 4. container init ----
+# ---- 4. mcp servers ----
+step "mcp servers — 7 user-scope (z.ai web tools + stdio helpers)"
+# Needs ZAI_TOKEN (keychain, step 3) to resolve the z.ai placeholder.
+# Also creates ~/.claude.json if absent so cc-launch can bind-mount it.
+"$ROOT/scripts/install-mcp.sh" || warn "mcp install incomplete — re-run scripts/install-mcp.sh"
+ok "mcp servers merged into ~/.claude.json"
+
+# ---- 5. container init ----
 step "container init (interactive onboarding)"
 if [ -d "$HOME/.code-container" ]; then
   skip "~/.code-container exists"
@@ -72,7 +79,7 @@ else
   container init || die "container init failed"
 fi
 
-# ---- 5. wire config into build context ----
+# ---- 6. wire config into build context ----
 step "wire config (Dockerfile.User + bin-container + live .claude link)"
 mkdir -p "$HOME/.code-container"
 cp "$ROOT/Dockerfile.User" "$HOME/.code-container/Dockerfile.User"
@@ -118,7 +125,7 @@ case $? in
    *) warn "settings merge failed — statusline may not render" ;;
 esac
 
-# ---- 6. build image ----
+# ---- 7. build image ----
 step "build image  (~10-15 min first time; rtk compiles from source)"
 t0=$SECONDS
 container build user || die "image build failed"
@@ -132,7 +139,7 @@ ok "image built in $((SECONDS - t0))s"
 container remove >/dev/null 2>&1 && ok "stale container removed (recreates on launch)" \
                                  || skip "no stale container to remove"
 
-# ---- 7. enter ----
+# ---- 8. enter ----
 step "enter the container"
 printf "  Ready. Enter with:\n    ${c_dim}cc-launch${c_off}   (or ${c_dim}%s/bin/cc-launch${c_off})\n" "$ROOT"
 echo "  First run adds the providers.env mount + shared-mem volume, then enters."

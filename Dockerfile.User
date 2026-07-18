@@ -39,9 +39,10 @@ RUN curl -fsSL https://deb.nodesource.com/setup_23.x | bash - \
  && ln -s "$(command -v node)" /Users/amahale/.nvm/versions/node/v23.11.0/bin/node
 
 # graphify (Python pkg 'graphifyy') — graphify query + the gsd-graphify-update hook.
+# markitdown-mcp — stdio MCP server (markitdown). Both pip-installed in one layer.
 # (Rebuild race across host+container is accepted — same as multiple host terminals.)
 RUN apt-get update && apt-get install -y --no-install-recommends python3-pip \
- && pip install --no-cache-dir --break-system-packages graphifyy \
+ && pip install --no-cache-dir --break-system-packages graphifyy markitdown-mcp \
  && rm -rf /var/lib/apt/lists/*
 
 # rtk (Rust token-saver) — built from source via cargo, same as brew does.

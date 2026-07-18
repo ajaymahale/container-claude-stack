@@ -8,7 +8,7 @@ This file is the first artifact of the `claude-stack` repo. Build outward from h
 Run multiple isolated Claude Code instances (z.ai / anthropic / deepseek /
 headroom) inside Docker containers managed by `aerovato/container`, with:
 
-- shared plugins + skills + MCP (`~/.claude`, mounted — zero rebuild on update)
+- shared plugins + skills + MCP (`~/.claude`, mounted — zero rebuild on update). NOTE: MCP `mcpServers` live in `~/.claude.json` (a file at `~/`), NOT under `~/.claude` — so the dir mount alone does NOT carry them. `mcp.json` + `scripts/install-mcp.sh` declare + merge them into `~/.claude.json`; `bin/cc-launch` bind-mounts that file RW into the container so both sides see one config (accepted host+container write race, same as the `~/.claude` mount).
 - shared brain (claude-mem server) across all instances
 - shared LLM proxy (headroom) where compatible
 - secrets in macOS Keychain — never in image, git, or `.zshrc`
@@ -72,10 +72,12 @@ headroom) inside Docker containers managed by `aerovato/container`, with:
 - **Verify**: `cc-shared` shows 4 live panels; killing one provider's process doesn't kill others; `cc-bg zai` runs an unattended job isolated from the shared container.
 
 ### P5 — Plugin catalog + updater
-- [ ] `plugins.yaml` — every plugin/skill: name, kind (plugin/skill/mcp), source (git/npm/marketplace), path, `update` cmd
+- [x] `plugins.yaml` — plugins + skills (name, source, marketplace). **MCP split out** → `mcp.json` (different mechanism: direct `~/.claude.json` merge, no `claude mcp` CLI, so the z.ai token stays out of argv).
+- [x] `scripts/install-mcp.sh` — merges `mcp.json` into `~/.claude.json` `mcpServers`; resolves `$ZAI_TOKEN` from keychain (host) / `providers.env` (container). Wired as install.sh step 4. `bin/cc-launch` bind-mounts `~/.claude.json` RW into the container so both sides share one MCP config.
 - [ ] `scripts/update-plugins.sh` — reads manifest, runs each `update`, logs to `logs/update-<date>.log`
 - [ ] `launchd` plist — weekly run on host (updates propagate to containers via mount, no rebuild)
-- **Verify**: `update-plugins.sh` runs clean; a changed skill is visible in-container next session without `container build`.
+- [x] **stdio MCP binaries baked in image:** `headroom` (pip headroom-ai[all]) + `markitdown-mcp` (pip) in `Dockerfile.User`; `playwright`/`zai` use the image node. `serena` dropped (not wanted). Host-side markitdown: `uv tool install markitdown-mcp`.
+- **Verify**: `update-plugins.sh` runs clean; a changed skill is visible in-container next session without `container build`; `/mcp` in-container lists all 6 servers.
 
 ### P6 — Export / import
 - [ ] Private GitHub repo `claude-stack`

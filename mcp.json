@@ -1,0 +1,31 @@
+{
+  "_comment": "User-scope MCP servers. scripts/install-mcp.sh merges each entry's `json` into the mcpServers block of ~/.claude.json (user scope, global). Direct merge — no `claude` CLI — so no token lands in argv/ps, same pattern as install.sh merging claude-settings.json. Re-runnable; existing entries are overwritten, ~/.claude.json backed up first.",
+  "_comment_secret": "$ZAI_TOKEN is a PLACEHOLDER only. install-mcp.sh resolves it from the macOS Keychain (cc-zai-token) on the host, or the ZAI_TOKEN env var (providers.env, mounted by cc-launch) inside a container. Never committed. Matches repo invariant #1: tokens keychain-only — never git, image, or .zshrc.",
+  "_comment_binaries": "stdio servers need their binary on PATH in BOTH host and container. headroom (pip install headroom-ai[all]) + markitdown-mcp (pip install markitdown-mcp) are baked in Dockerfile.User. npx (playwright, zai) uses the image node. On the host, install markitdown-mcp via `uv tool install markitdown-mcp` (or pip).",
+  "servers": [
+    {
+      "name": "playwright",
+      "json": { "type": "stdio", "command": "npx", "args": ["@playwright/mcp@latest"], "env": {} }
+    },
+    {
+      "name": "markitdown",
+      "json": { "type": "stdio", "command": "markitdown-mcp", "args": [], "env": {} }
+    },
+    {
+      "name": "headroom",
+      "json": { "type": "stdio", "command": "headroom", "args": ["mcp", "serve"], "env": {} }
+    },
+    {
+      "name": "web-search-prime",
+      "json": { "type": "http", "url": "https://api.z.ai/api/mcp/web_search_prime/mcp", "headers": { "Authorization": "Bearer $ZAI_TOKEN" } }
+    },
+    {
+      "name": "web-reader",
+      "json": { "type": "http", "url": "https://api.z.ai/api/mcp/web_reader/mcp", "headers": { "Authorization": "Bearer $ZAI_TOKEN" } }
+    },
+    {
+      "name": "zai-mcp-server",
+      "json": { "type": "stdio", "command": "npx", "args": ["-y", "@z_ai/mcp-server"], "env": { "Z_AI_API_KEY": "$ZAI_TOKEN", "Z_AI_MODE": "ZAI" } }
+    }
+  ]
+}
