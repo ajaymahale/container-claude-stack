@@ -54,20 +54,10 @@ required = [
     ("-v", "claude-mem-shared:/root/.claude-mem"),
     ("-e", "CLAUDE_MEM_DATA_DIR=/root/.claude-mem"),
 ]
-# Bind-mount ~/.claude.json so the container sees the host's user-scope MCP
-# servers (mcpServers lives in ~/.claude.json, NOT under the ~/.claude dir the
-# harness already mounts). RW: claude read-modify-writes this file (tips,
-# caches, MCP connection state), so RO would break in-container writes.
-# ponytail: concurrent host+container writers race on the whole file (last write
-# wins) — same accepted risk as the ~/.claude mount (graphify). Upgrade path if
-# this bites: switch to in-container install-mcp.sh reading providers.env, drop
-# this mount. Only add when the host file exists, else docker makes it a dir.
-claude_json = os.path.expanduser("~/.claude.json")
-if os.path.exists(claude_json):
-    required.append(("-v", f"{claude_json}:/root/.claude.json"))
-else:
-    print("  ! ~/.claude.json absent — run scripts/install-mcp.sh first;", file=sys.stderr)
-    print("    container MCP servers will be unavailable this session.", file=sys.stderr)
+# ~/.claude.json -> /root/.claude.json is NOT added here: @aerovato/container's
+# harness-pack already bind-mounts it RW for every claude project, so adding it
+# again caused "Duplicate mount point: /root/.claude.json". MCP servers in
+# ~/.claude.json are visible to the container via that built-in mount.
 with open(path) as f:
     cfg = json.load(f)
 drf = cfg.setdefault("dockerRunFlags", [])
@@ -75,6 +65,10 @@ cleaned, i = [], 0
 while i < len(drf):
     tok, nxt = drf[i], drf[i + 1] if i + 1 < len(drf) else None
     if tok in ("-v", "-e", "--network", "--volume", "--env") and nxt in obsolete_vals:
+        i += 2; continue
+    # Strip any stale ~/.claude.json bind-mount written by an older cc-launch —
+    # the container CLI mounts it itself, so a leftover here collides.
+    if tok in ("-v", "--volume") and nxt and ":/root/.claude.json" in nxt:
         i += 2; continue
     cleaned.append(tok); i += 1
 changed = cleaned != drf
@@ -92,7 +86,7 @@ PY
 rc=$?
 set -e
 if [ "$rc" -eq 10 ]; then
-  echo "Container wiring updated in $SETTINGS (providers.env + shared claude-mem volume + DATA_DIR + .claude.json mount)."
+  echo "Container wiring updated in $SETTINGS (providers.env + shared claude-mem volume + DATA_DIR; .claude.json mounted by container CLI)."
   echo "Recreating the container to apply (project is mounted; in-container state is disposable)..."
   container remove 2>/dev/null || true     # no-op if none exists yet (first run)
 fi
